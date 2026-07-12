@@ -26,9 +26,18 @@ export const NAV_ITEMS = [
 ];
 
 export default function Sidebar({ activeNav, onNavigate }) {
-  const { currentUser, logoutUser } = useContext(StateContext);
-  const role = currentUser?.role || 'Employee';
-  const initials = currentUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AF';
+  const {
+    currentUser,
+    logoutUser,
+    simulatedRole,
+    setSimulatedRole,
+    getActiveRole,
+    getActiveUser
+  } = useContext(StateContext);
+
+  const role = getActiveRole();
+  const activeUser = getActiveUser();
+  const initials = activeUser?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'AF';
 
   return (
     <aside style={styles.sidebar}>
@@ -59,11 +68,26 @@ export default function Sidebar({ activeNav, onNavigate }) {
         ))}
       </nav>
 
+      {/* Role Switcher Simulator */}
+      <div style={styles.simulatorRow}>
+        <span style={styles.simulatorLabel}>Simulate Role:</span>
+        <select
+          value={simulatedRole || currentUser?.role || 'Employee'}
+          onChange={(e) => setSimulatedRole(e.target.value)}
+          style={styles.simulatorSelect}
+        >
+          <option value="Employee">Employee</option>
+          <option value="Department Head">Department Head</option>
+          <option value="Asset Manager">Asset Manager</option>
+          <option value="Admin">Admin (Full Access)</option>
+        </select>
+      </div>
+
       {/* User footer */}
       <div style={styles.sidebarFooter}>
         <div style={styles.avatarCircle}>{initials}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={styles.userName}>{currentUser?.name}</p>
+          <p style={styles.userName}>{activeUser?.name || currentUser?.name}</p>
           <p style={styles.userRole}>{role}</p>
         </div>
         <button
@@ -113,4 +137,8 @@ const styles = {
   },
   userName: { fontSize: 13, fontWeight: 500, color: COLORS.navy, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
   userRole: { fontSize: 11, color: COLORS.textMuted, margin: 0 },
+
+  simulatorRow: { display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 6px', background: '#F8FAFC', borderRadius: 8, border: `0.5px solid ${COLORS.border}`, marginBottom: 14 },
+  simulatorLabel: { fontSize: 11, fontWeight: 600, color: COLORS.navy, textTransform: 'uppercase', letterSpacing: '0.02em' },
+  simulatorSelect: { height: 32, padding: '0 8px', borderRadius: 6, border: `0.5px solid ${COLORS.border}`, background: '#FFFFFF', fontSize: 12, fontFamily: 'inherit', color: COLORS.navy, cursor: 'pointer' },
 };
