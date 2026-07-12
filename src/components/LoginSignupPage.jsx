@@ -82,13 +82,13 @@ export default function LoginSignupPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
     if (mode === 'login') {
-      const res = loginUser(email, password);
+      const res = await loginUser(email, password);
       if (!res.success) {
         setError(res.message);
       }
@@ -97,7 +97,7 @@ export default function LoginSignupPage() {
         setError('Please fill in all fields.');
         return;
       }
-      const res = signupUser(name, email, password, selectedDept);
+      const res = await signupUser(name, email, password, selectedDept);
       if (res.success) {
         setSuccess(res.message);
         setMode('login');
