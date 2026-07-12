@@ -1,7 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 
 export const StateContext = createContext();
 
+// ── DEFAULT SEED DATA (FALLBACKS FOR DEMO & TESTING) ────────────────
 const DEFAULT_DEPARTMENTS = [
   { id: 'dep-it', name: 'Information Technology', headId: 'emp-2', parentId: null, status: 'Active' },
   { id: 'dep-hr', name: 'Human Resources', headId: 'emp-3', parentId: null, status: 'Active' },
@@ -17,11 +19,11 @@ const DEFAULT_CATEGORIES = [
 ];
 
 const DEFAULT_EMPLOYEES = [
-  { id: 'emp-1', name: 'Admin User', email: 'admin@assetflow.com', department: 'Information Technology', role: 'Admin', status: 'Active', password: 'password' },
-  { id: 'emp-2', name: 'Sarah Connor', email: 'manager@assetflow.com', department: 'Information Technology', role: 'Asset Manager', status: 'Active', password: 'password' },
-  { id: 'emp-3', name: 'Raj Koothrappali', email: 'head@assetflow.com', department: 'Human Resources', role: 'Department Head', status: 'Active', password: 'password' },
-  { id: 'emp-4', name: 'Priya Sen', email: 'staff@assetflow.com', department: 'Operations', role: 'Employee', status: 'Active', password: 'password' },
-  { id: 'emp-5', name: 'John Doe', email: 'john@assetflow.com', department: 'Operations', role: 'Employee', status: 'Active', password: 'password' }
+  { id: 'emp-1', name: 'Admin User', email: 'admin@assetflow.com', department: 'Information Technology', role: 'Admin', status: 'Active' },
+  { id: 'emp-2', name: 'Sarah Connor', email: 'manager@assetflow.com', department: 'Information Technology', role: 'Asset Manager', status: 'Active' },
+  { id: 'emp-3', name: 'Raj Koothrappali', email: 'head@assetflow.com', department: 'Human Resources', role: 'Department Head', status: 'Active' },
+  { id: 'emp-4', name: 'Priya Sen', email: 'staff@assetflow.com', department: 'Operations', role: 'Employee', status: 'Active' },
+  { id: 'emp-5', name: 'John Doe', email: 'john@assetflow.com', department: 'Operations', role: 'Employee', status: 'Active' }
 ];
 
 const DEFAULT_ASSETS = [
@@ -38,7 +40,7 @@ const DEFAULT_ASSETS = [
     shared: false, 
     status: 'Allocated',
     department: 'Information Technology',
-    assignedTo: 'emp-4', // Priya
+    assignedTo: 'emp-4',
     customFields: { 'Warranty Period (months)': '24' },
     history: [
       { date: '2025-01-10', type: 'Registration', details: 'Asset registered in system' },
@@ -47,25 +49,6 @@ const DEFAULT_ASSETS = [
   },
   { 
     id: 'asset-2', 
-    name: 'Dell UltraSharp 27" Monitor', 
-    category: 'Electronics', 
-    tag: 'AF-0002', 
-    serial: 'MX7654321', 
-    acqDate: '2025-02-15', 
-    acqCost: 450, 
-    condition: 'Good', 
-    location: 'Headquarters - 3rd Floor', 
-    shared: false, 
-    status: 'Available',
-    department: 'Information Technology',
-    assignedTo: '',
-    customFields: { 'Warranty Period (months)': '36' },
-    history: [
-      { date: '2025-02-15', type: 'Registration', details: 'Asset registered in system' }
-    ]
-  },
-  { 
-    id: 'asset-3', 
     name: 'Conference Room Alpha', 
     category: 'Shared Spaces', 
     tag: 'AF-0003', 
@@ -79,196 +62,20 @@ const DEFAULT_ASSETS = [
     department: 'Operations',
     assignedTo: '',
     customFields: { 'Capacity': '12' },
-    history: [
-      { date: '2024-06-01', type: 'Registration', details: 'Shared space added to system' }
-    ]
-  },
-  { 
-    id: 'asset-4', 
-    name: 'Tesla Model 3 (Fleet #4)', 
-    category: 'Vehicles', 
-    tag: 'AF-0004', 
-    serial: '5YJ3E1EA5L', 
-    acqDate: '2024-11-20', 
-    acqCost: 38000, 
-    condition: 'Good', 
-    location: 'Parking Garage G2', 
-    shared: true, 
-    status: 'Available',
-    department: 'Operations',
-    assignedTo: '',
-    customFields: { 'License Plate': 'KA-03-MM-1234', 'Insurance Expiry': '2026-11-20' },
-    history: [
-      { date: '2024-11-20', type: 'Registration', details: 'Vehicle registered as shared resource' }
-    ]
-  },
-  { 
-    id: 'asset-5', 
-    name: 'Ergonomic Desk Chair', 
-    category: 'Furniture', 
-    tag: 'AF-0005', 
-    serial: 'CHAIR-99', 
-    acqDate: '2025-03-01', 
-    acqCost: 300, 
-    condition: 'Excellent', 
-    location: 'Headquarters - 2nd Floor', 
-    shared: false, 
-    status: 'Available',
-    department: 'Human Resources',
-    assignedTo: '',
-    customFields: { 'Material': 'Mesh' },
-    history: [
-      { date: '2025-03-01', type: 'Registration', details: 'Furniture registered in system' }
-    ]
-  },
-  { 
-    id: 'asset-6', 
-    name: 'Apple MacBook Pro 16"', 
-    category: 'Electronics', 
-    tag: 'AF-0006', 
-    serial: 'C02F2345Q6W', 
-    acqDate: '2024-12-15', 
-    acqCost: 2400, 
-    condition: 'Needs Repair', 
-    location: 'Remote Work', 
-    shared: false, 
-    status: 'Under Maintenance',
-    department: 'Information Technology',
-    assignedTo: 'emp-5', // John Doe
-    customFields: { 'Warranty Period (months)': '12' },
-    history: [
-      { date: '2024-12-15', type: 'Registration', details: 'Asset registered in system' },
-      { date: '2024-12-16', type: 'Allocation', details: 'Allocated to John Doe' },
-      { date: '2026-07-10', type: 'Maintenance Request', details: 'Battery swelling issue reported' },
-      { date: '2026-07-11', type: 'Maintenance Approval', details: 'Approved for maintenance. Status flipped to Under Maintenance' }
-    ]
+    history: [{ date: '2024-06-01', type: 'Registration', details: 'Shared space added' }]
   }
 ];
 
-const DEFAULT_ALLOCATIONS = [
-  {
-    id: 'alloc-1',
-    assetId: 'asset-1',
-    employeeId: 'emp-4', // Priya
-    allocatedBy: 'emp-2', // Manager
-    allocatedDate: '2025-01-12',
-    expectedReturnDate: '2026-06-30', // Overdue relative to current time 2026-07-12
-    returnedDate: '',
-    status: 'Active',
-    notes: 'Initial allocation for operations work.'
-  },
-  {
-    id: 'alloc-2',
-    assetId: 'asset-6',
-    employeeId: 'emp-5', // John
-    allocatedBy: 'emp-2',
-    allocatedDate: '2024-12-16',
-    expectedReturnDate: '2026-08-30',
-    returnedDate: '',
-    status: 'Active',
-    notes: 'Development machine.'
-  }
-];
-
-const DEFAULT_BOOKINGS = [
-  {
-    id: 'book-1',
-    resourceId: 'asset-3', // Conf room Alpha
-    employeeId: 'emp-4', // Priya
-    title: 'Daily Standup Meeting',
-    startTime: '2026-07-12T09:00',
-    endTime: '2026-07-12T10:00',
-    status: 'Completed'
-  },
-  {
-    id: 'book-2',
-    resourceId: 'asset-3',
-    employeeId: 'emp-5', // John
-    title: 'Client Demo Presentation',
-    startTime: '2026-07-12T11:00',
-    endTime: '2026-07-12T12:00',
-    status: 'Upcoming'
-  },
-  {
-    id: 'book-3',
-    resourceId: 'asset-4', // Tesla
-    employeeId: 'emp-3', // Raj
-    title: 'Site Visit Operations',
-    startTime: '2026-07-12T13:00',
-    endTime: '2026-07-12T17:00',
-    status: 'Upcoming'
-  }
-];
-
-const DEFAULT_MAINTENANCE = [
-  {
-    id: 'maint-1',
-    assetId: 'asset-6',
-    reportedBy: 'emp-5',
-    reportedDate: '2026-07-10',
-    issue: 'Battery swelling and keyboard issues',
-    priority: 'High',
-    status: 'Under Maintenance', // Pending -> Approved / Under Maintenance -> Technician Assigned -> In Progress -> Resolved
-    technician: 'Alice Cooper (External Support)',
-    cost: 150,
-    history: [
-      { status: 'Pending', date: '2026-07-10', note: 'Raised request' },
-      { status: 'Under Maintenance', date: '2026-07-11', note: 'Approved by Sarah Connor' }
-    ]
-  }
-];
-
-const DEFAULT_AUDITS = [
-  {
-    id: 'audit-1',
-    name: 'Q2 2026 IT Asset Verification',
-    department: 'Information Technology',
-    location: 'Headquarters - 3rd Floor',
-    startDate: '2026-06-01',
-    endDate: '2026-06-15',
-    auditors: ['emp-2'],
-    status: 'Closed',
-    checklist: [
-      { assetId: 'asset-1', tag: 'AF-0001', name: 'Dell XPS 15 Laptop', result: 'Verified', notes: 'Checked in-person with Priya' },
-      { assetId: 'asset-2', tag: 'AF-0002', name: 'Dell UltraSharp 27" Monitor', result: 'Verified', notes: 'Located at desk 3C' }
-    ],
-    discrepancies: []
-  },
-  {
-    id: 'audit-2',
-    name: 'July 2026 Operations Audit',
-    department: 'Operations',
-    location: 'Headquarters - 1st Floor',
-    startDate: '2026-07-01',
-    endDate: '2026-07-20',
-    auditors: ['emp-2', 'emp-3'],
-    status: 'Active',
-    checklist: [
-      { assetId: 'asset-3', tag: 'AF-0003', name: 'Conference Room Alpha', result: 'Pending', notes: '' },
-      { assetId: 'asset-4', tag: 'AF-0004', name: 'Tesla Model 3 (Fleet #4)', result: 'Pending', notes: '' }
-    ],
-    discrepancies: []
-  }
-];
-
-const DEFAULT_LOGS = [
-  { id: 'log-1', timestamp: '2026-07-12T09:00:00', userId: 'emp-4', action: 'Resource Booking', details: 'Booked Conference Room Alpha for Daily Standup Meeting' },
-  { id: 'log-2', timestamp: '2026-07-11T14:30:00', userId: 'emp-2', action: 'Maintenance Approval', details: 'Approved maintenance request for MacBook Pro (AF-0006)' },
-  { id: 'log-3', timestamp: '2026-07-10T10:15:00', userId: 'emp-5', action: 'Maintenance Request', details: 'Raised maintenance request for MacBook Pro (AF-0006)' }
-];
-
-const DEFAULT_NOTIFICATIONS = [
-  { id: 'notif-1', timestamp: '2026-07-12T09:00:00', userId: 'emp-4', title: 'Booking Confirmed', message: 'Your booking for Conference Room Alpha has been confirmed.', read: false },
-  { id: 'notif-2', timestamp: '2026-07-11T14:30:00', userId: 'emp-5', title: 'Maintenance Approved', message: 'Your maintenance request for MacBook Pro (AF-0006) was approved. Status updated to Under Maintenance.', read: false },
-  { id: 'notif-3', timestamp: '2026-07-12T00:00:00', userId: 'emp-2', title: 'Overdue Asset Alert', message: 'Asset Dell XPS 15 Laptop (AF-0001) assigned to Priya Sen was expected back on 2026-06-30 and is now overdue.', read: false }
-];
-
-const DEFAULT_TRANSFERS = [
-  // { id: 'trans-1', assetId: 'asset-1', fromId: 'emp-4', toId: 'emp-5', requestedBy: 'emp-5', status: 'Pending', requestDate: '2026-07-12' }
-];
+const DEFAULT_ALLOCATIONS = [];
+const DEFAULT_BOOKINGS = [];
+const DEFAULT_MAINTENANCE = [];
+const DEFAULT_AUDITS = [];
+const DEFAULT_LOGS = [];
+const DEFAULT_NOTIFICATIONS = [];
+const DEFAULT_TRANSFERS = [];
 
 export const StateProvider = ({ children }) => {
-  // Try loading from localStorage, fallback to seed defaults
+  // Try loading from localStorage, fallback to defaults
   const getInitialState = (key, defaultValue) => {
     const saved = localStorage.getItem(`assetflow_${key}`);
     return saved ? JSON.parse(saved) : defaultValue;
@@ -286,13 +93,11 @@ export const StateProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(() => getInitialState('notifications', DEFAULT_NOTIFICATIONS));
   const [transfers, setTransfers] = useState(() => getInitialState('transfers', DEFAULT_TRANSFERS));
 
-  // Current logged in user.
-  // Initially we log in as the Admin (Sarah / Sarah Connor - wait, Admin is emp-1, Sarah Connor is Asset Manager).
-  // We can let users simulate different roles dynamically at the top!
-  const [currentUser, setCurrentUser] = useState(null); // always start logged out
-  const [simulatedRole, setSimulatedRole] = useState(null); // When set, overrides current user's functional permissions for demo
+  const [currentUser, setCurrentUser] = useState(null);
+  const [simulatedRole, setSimulatedRole] = useState(null);
+  const [supabaseConnected, setSupabaseConnected] = useState(false);
 
-  // Sync to localStorage when state changes
+  // ── Sync to localStorage ───────────────────────────────────────
   useEffect(() => {
     localStorage.setItem('assetflow_departments', JSON.stringify(departments));
   }, [departments]);
@@ -326,11 +131,190 @@ export const StateProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('assetflow_transfers', JSON.stringify(transfers));
   }, [transfers]);
-  useEffect(() => {
-    localStorage.setItem('assetflow_currentUser', JSON.stringify(currentUser));
-  }, [currentUser]);
 
-  // Current effective role
+  // ── FETCH DATABASE FROM SUPABASE ──────────────────────────────────
+  const fetchSupabaseData = async () => {
+    try {
+      const { data: deptData } = await supabase.from('departments').select('*');
+      if (deptData) {
+        setDepartments(deptData.map(d => ({
+          id: d.id,
+          name: d.name,
+          headId: d.head_employee_id || '',
+          parentId: d.parent_dept_id || null,
+          status: d.status
+        })));
+        setSupabaseConnected(true);
+      }
+
+      const { data: catData } = await supabase.from('categories').select('*');
+      if (catData) {
+        setCategories(catData.map(c => ({
+          id: c.id,
+          name: c.name,
+          fields: Array.isArray(c.extra_fields) ? c.extra_fields : Object.values(c.extra_fields || {})
+        })));
+      }
+
+      const { data: empData } = await supabase.from('employees').select('*, departments(name)');
+      if (empData) {
+        setEmployees(empData.map(e => ({
+          id: e.id,
+          name: e.name,
+          email: e.email,
+          department: e.departments ? e.departments.name : '',
+          role: e.role,
+          status: e.status
+        })));
+      }
+
+      const { data: assetsData } = await supabase.from('assets').select('*, categories(name)');
+      const { data: allocData } = await supabase.from('allocations').select('*');
+
+      if (assetsData && allocData) {
+        setAllocations(allocData.map(al => ({
+          id: al.id,
+          assetId: al.asset_id,
+          employeeId: al.employee_id,
+          departmentId: al.department_id,
+          allocatedDate: al.allocated_on?.substring(0, 10),
+          expectedReturnDate: al.expected_return_date,
+          status: al.status,
+          notes: al.condition_notes_on_return || ''
+        })));
+
+        // Resolve active transfers
+        const transferList = [];
+        const groupedAlloc = {};
+        allocData.forEach(al => {
+          if (al.status === 'TransferPending') {
+            if (!groupedAlloc[al.asset_id]) groupedAlloc[al.asset_id] = [];
+            groupedAlloc[al.asset_id].push(al);
+          }
+        });
+        Object.entries(groupedAlloc).forEach(([assetId, allocs]) => {
+          if (allocs.length >= 2) {
+            const sorted = allocs.sort((a, b) => a.allocated_on.localeCompare(b.allocated_on));
+            transferList.push({
+              id: `trans-${assetId}`,
+              assetId,
+              fromId: sorted[0].employee_id,
+              toId: sorted[1].employee_id,
+              status: 'Pending',
+              requestDate: sorted[1].allocated_on?.substring(0, 10)
+            });
+          }
+        });
+        setTransfers(transferList);
+
+        setAssets(assetsData.map(a => {
+          const activeAlloc = allocData.find(al => al.asset_id === a.id && al.status === 'Active');
+          const emp = activeAlloc ? empData?.find(e => e.id === activeAlloc.employee_id) : null;
+          const dept = activeAlloc && !emp ? deptData?.find(d => d.id === activeAlloc.department_id) : null;
+
+          return {
+            id: a.id,
+            name: a.name,
+            category: a.categories ? a.categories.name : '',
+            tag: a.tag || '',
+            serial: a.serial_number || '',
+            acqDate: a.acquisition_date || '',
+            acqCost: Number(a.acquisition_cost) || 0,
+            condition: a.condition || 'Good',
+            location: a.location || '',
+            shared: a.is_bookable,
+            status: a.status,
+            department: emp ? emp.departments?.name : (dept ? dept.name : ''),
+            assignedTo: emp ? emp.id : '',
+            customFields: {},
+            history: [{ date: a.created_at?.substring(0, 10), type: 'Registration', details: 'Asset registered in database' }]
+          };
+        }));
+      }
+
+      const { data: bookData } = await supabase.from('bookings').select('*');
+      if (bookData) {
+        setBookings(bookData.map(b => ({
+          id: b.id,
+          resourceId: b.asset_id,
+          employeeId: b.booked_by_employee_id,
+          title: 'Resource Booking',
+          startTime: b.start_time,
+          endTime: b.end_time,
+          status: b.status
+        })));
+      }
+
+      // Safe check for newly created tables
+      const { data: maintData } = await supabase.from('maintenance').select('*');
+      if (maintData) {
+        setMaintenance(maintData.map(m => ({
+          id: m.id,
+          assetId: m.asset_id,
+          reportedBy: m.reported_by,
+          reportedDate: m.reported_date,
+          issue: m.issue,
+          priority: m.priority,
+          status: m.status,
+          technician: m.technician || '',
+          cost: Number(m.cost) || 0,
+          history: m.history || []
+        })));
+      }
+
+      const { data: auditData } = await supabase.from('audits').select('*');
+      if (auditData) {
+        setAudits(auditData);
+      }
+
+      const { data: logData } = await supabase.from('logs').select('*');
+      if (logData) {
+        setLogs(logData);
+      }
+
+      const { data: notifData } = await supabase.from('notifications').select('*');
+      if (notifData) {
+        setNotifications(notifData);
+      }
+    } catch (err) {
+      console.warn('Supabase offline/not available. Falling back to local storage.', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupabaseData();
+
+    // Bind auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        try {
+          const { data: emp } = await supabase
+            .from('employees')
+            .select('*, departments(name)')
+            .eq('auth_user_id', session.user.id)
+            .maybeSingle();
+
+          if (emp) {
+            setCurrentUser({
+              id: emp.id,
+              name: emp.name,
+              email: emp.email,
+              department: emp.departments ? emp.departments.name : '',
+              role: emp.role,
+              status: emp.status
+            });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => subscription?.unsubscribe();
+  }, []);
+
   const getActiveRole = () => {
     if (simulatedRole) return simulatedRole;
     return currentUser ? currentUser.role : 'Guest';
@@ -338,154 +322,225 @@ export const StateProvider = ({ children }) => {
 
   const getActiveUser = () => {
     if (simulatedRole) {
-      // Find an employee with that role for a complete simulation context
       const match = employees.find(e => e.role === simulatedRole);
       return match || currentUser;
     }
     return currentUser;
   };
 
-  // Helper: log activity
-  const logActivity = (action, details, userId = null) => {
+  const logActivity = async (action, details, userId = null) => {
     const activeU = getActiveUser();
-    const uId = userId || (activeU ? activeU.id : 'system');
+    const actorId = userId || activeU?.id;
     const newLog = {
       id: `log-${Date.now()}`,
-      timestamp: new Date().toISOString().substring(0, 19),
-      userId: uId,
+      timestamp: new Date().toISOString(),
+      user_id: actorId,
       action,
       details
     };
     setLogs(prev => [newLog, ...prev]);
+
+    if (supabaseConnected && actorId) {
+      await supabase.from('logs').insert({
+        user_id: actorId,
+        action,
+        details
+      });
+    }
   };
 
-  // Helper: send notification
-  const sendNotification = (userId, title, message) => {
+  const sendNotification = async (userId, title, message) => {
     const newNotif = {
       id: `notif-${Date.now()}`,
-      timestamp: new Date().toISOString().substring(0, 19),
-      userId,
+      timestamp: new Date().toISOString(),
+      user_id: userId,
       title,
       message,
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+
+    if (supabaseConnected) {
+      await supabase.from('notifications').insert({
+        user_id: userId,
+        title,
+        message,
+        read: false
+      });
+    }
   };
 
-  // Login handler
-  const loginUser = (email, password) => {
-    const matched = employees.find(e => e.email.toLowerCase() === email.toLowerCase() && e.password === password);
-    if (matched) {
-      if (matched.status !== 'Active') {
-        return { success: false, message: 'Your account is currently deactivated.' };
+  // ── AUTHENTICATION ───────────────────────────────────────────────
+  const loginUser = async (email, password) => {
+    if (supabaseConnected) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return { success: false, message: error.message };
+
+      const { data: emp } = await supabase
+        .from('employees')
+        .select('*')
+        .eq('auth_user_id', data.user.id)
+        .maybeSingle();
+
+      if (emp) {
+        if (emp.status === 'Inactive') {
+          await supabase.auth.signOut();
+          return { success: false, message: 'Your account is currently deactivated.' };
+        }
+        setCurrentUser(emp);
+        setSimulatedRole(null);
+        return { success: true, user: emp };
       }
+    }
+
+    // fallback login for prototype
+    const matched = employees.find(e => e.email.toLowerCase() === email.toLowerCase());
+    if (matched) {
+      if (matched.status === 'Inactive') return { success: false, message: 'Account is deactivated.' };
       setCurrentUser(matched);
-      setSimulatedRole(null); // Reset simulation on actual login
-      logActivity('Login', `User ${matched.name} logged in successfully`, matched.id);
+      setSimulatedRole(null);
       return { success: true, user: matched };
     }
-    return { success: false, message: 'Invalid email or password.' };
+    return { success: false, message: 'Invalid credentials.' };
   };
 
-  const logoutUser = () => {
-    if (currentUser) {
-      logActivity('Logout', `User ${currentUser.name} logged out`, currentUser.id);
+  const logoutUser = async () => {
+    if (supabaseConnected) {
+      await supabase.auth.signOut();
     }
     setCurrentUser(null);
     setSimulatedRole(null);
   };
 
-  // Signup (creates Employee account only, no role selection)
-  const signupUser = (name, email, password, departmentName = 'Operations') => {
-    if (employees.some(e => e.email.toLowerCase() === email.toLowerCase())) {
-      return { success: false, message: 'Email is already registered.' };
+  const signupUser = async (name, email, password, departmentName = 'Operations') => {
+    if (supabaseConnected) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name } }
+      });
+      if (error) return { success: false, message: error.message };
+
+      // Try assigning department ID
+      const { data: dept } = await supabase.from('departments').select('id').eq('name', departmentName).maybeSingle();
+      if (dept && data.user) {
+        // trigger handler handle_new_user runs after insert auth.users.
+        // Wait a split second and update department_id.
+        setTimeout(async () => {
+          await supabase
+            .from('employees')
+            .update({ department_id: dept.id })
+            .eq('auth_user_id', data.user.id);
+          fetchSupabaseData();
+        }, 800);
+      }
+
+      return { success: true, message: 'Registration successful! Verification email sent.' };
     }
+
+    // Fallback
     const newEmp = {
       id: `emp-${Date.now()}`,
       name,
       email,
       department: departmentName,
-      role: 'Employee', // Always default to Employee, no selection
-      status: 'Active',
-      password
+      role: 'Employee',
+      status: 'Active'
     };
     setEmployees(prev => [...prev, newEmp]);
-    logActivity('Signup', `New employee registered: ${name} (${email})`, newEmp.id);
     return { success: true, message: 'Registration successful! You can now log in.' };
   };
 
-  // Admin promotions and role updates
-  const updateEmployeeRole = (empId, newRole, newDepartment = null, newStatus = null) => {
+  const updateEmployeeRole = async (empId, newRole, newDepartment = null, newStatus = null) => {
     setEmployees(prev => prev.map(emp => {
       if (emp.id === empId) {
-        const updated = { 
-          ...emp, 
-          role: newRole, 
+        return {
+          ...emp,
+          role: newRole,
           department: newDepartment !== null ? newDepartment : emp.department,
           status: newStatus !== null ? newStatus : emp.status
         };
-        logActivity('Employee Update', `Admin updated employee ${emp.name}: Role=${newRole}, Dept=${updated.department}, Status=${updated.status}`);
-        return updated;
       }
       return emp;
     }));
+
+    if (supabaseConnected) {
+      const { data: dept } = await supabase.from('departments').select('id').eq('name', newDepartment).maybeSingle();
+      await supabase
+        .from('employees')
+        .update({
+          role: newRole,
+          department_id: dept ? dept.id : null,
+          status: newStatus !== null ? newStatus : 'Active'
+        })
+        .eq('id', empId);
+      fetchSupabaseData();
+    }
   };
 
-  // Add Department
-  const addDepartment = (name, headId = '', parentId = null) => {
-    const newDep = {
-      id: `dep-${Date.now()}`,
-      name,
-      headId,
-      parentId,
-      status: 'Active'
-    };
+  // ── DEPARTMENTS & CATEGORIES ─────────────────────────────────────
+  const addDepartment = async (name, headId = '', parentId = null) => {
+    const newDep = { id: `dep-${Date.now()}`, name, headId, parentId, status: 'Active' };
     setDepartments(prev => [...prev, newDep]);
-    logActivity('Department Creation', `Admin created department: ${name}`);
+
+    if (supabaseConnected) {
+      await supabase.from('departments').insert({
+        name,
+        head_employee_id: headId || null,
+        parent_dept_id: parentId || null,
+        status: 'Active'
+      });
+      fetchSupabaseData();
+    }
   };
 
-  // Update Department
-  const updateDepartment = (id, name, headId, parentId, status) => {
-    setDepartments(prev => prev.map(d => {
-      if (d.id === id) {
-        logActivity('Department Update', `Admin updated department ${name} (Status: ${status})`);
-        return { ...d, name, headId, parentId, status };
-      }
-      return d;
-    }));
+  const updateDepartment = async (id, name, headId, parentId, status) => {
+    setDepartments(prev => prev.map(d => d.id === id ? { ...d, name, headId, parentId, status } : d));
+
+    if (supabaseConnected) {
+      await supabase.from('departments').update({
+        name,
+        head_employee_id: headId || null,
+        parent_dept_id: parentId || null,
+        status
+      }).eq('id', id);
+      fetchSupabaseData();
+    }
   };
 
-  // Add Asset Category
-  const addCategory = (name, fields = []) => {
-    const newCat = {
-      id: `cat-${Date.now()}`,
-      name,
-      fields // format: [{ name: 'Warranty Period (months)', type: 'number', required: true }]
-    };
+  const addCategory = async (name, fields = []) => {
+    const newCat = { id: `cat-${Date.now()}`, name, fields };
     setCategories(prev => [...prev, newCat]);
-    logActivity('Category Creation', `Created asset category: ${name}`);
+
+    if (supabaseConnected) {
+      await supabase.from('categories').insert({
+        name,
+        extra_fields: fields
+      });
+      fetchSupabaseData();
+    }
   };
 
-  // Update Category
-  const updateCategory = (id, name, fields) => {
-    setCategories(prev => prev.map(c => {
-      if (c.id === id) {
-        return { ...c, name, fields };
-      }
-      return c;
-    }));
-    logActivity('Category Update', `Updated category: ${name}`);
+  const updateCategory = async (id, name, fields = []) => {
+    setCategories(prev => prev.map(c => c.id === id ? { ...c, name, fields } : c));
+
+    if (supabaseConnected) {
+      await supabase.from('categories').update({
+        name,
+        extra_fields: fields
+      }).eq('id', id);
+      fetchSupabaseData();
+    }
   };
 
-  // Register Asset (Asset Manager only)
-  const registerAsset = (name, categoryName, serial, acqDate, acqCost, condition, location, shared, customFields = {}) => {
-    const tagIndex = assets.length + 1;
-    const tag = `AF-${String(tagIndex).padStart(4, '0')}`;
+  // ── ASSETS ────────────────────────────────────────────────────────
+  const registerAsset = async (name, categoryName, serial, acqDate, acqCost, condition, location, shared, customFields = {}) => {
+    const nextTag = `AF-${String(assets.length + 1).padStart(4, '0')}`;
     const newAsset = {
       id: `asset-${Date.now()}`,
       name,
       category: categoryName,
-      tag,
+      tag: nextTag,
       serial,
       acqDate,
       acqCost: Number(acqCost),
@@ -496,398 +551,281 @@ export const StateProvider = ({ children }) => {
       department: '',
       assignedTo: '',
       customFields,
-      history: [{ date: new Date().toISOString().substring(0, 10), type: 'Registration', details: 'Asset registered in system' }]
+      history: [{ date: new Date().toISOString().substring(0, 10), type: 'Registration', details: 'Registered in database' }]
     };
     setAssets(prev => [...prev, newAsset]);
-    logActivity('Asset Registration', `Asset Manager registered asset ${name} (${tag})`);
+
+    if (supabaseConnected) {
+      const { data: cat } = await supabase.from('categories').select('id').eq('name', categoryName).maybeSingle();
+      await supabase.from('assets').insert({
+        name,
+        category_id: cat ? cat.id : null,
+        serial_number: serial,
+        acquisition_date: acqDate || null,
+        acquisition_cost: Number(acqCost) || null,
+        condition,
+        location,
+        is_bookable: !!shared,
+        status: 'Available'
+      });
+      fetchSupabaseData();
+    }
     return newAsset;
   };
 
-  // Update Asset details
-  const updateAsset = (id, updatedFields) => {
-    setAssets(prev => prev.map(a => {
-      if (a.id === id) {
-        const historyEntry = {
-          date: new Date().toISOString().substring(0, 10),
-          type: 'Update',
-          details: 'Asset details updated'
-        };
-        return { ...a, ...updatedFields, history: [...a.history, historyEntry] };
-      }
-      return a;
-    }));
+  const updateAsset = async (id, updatedFields) => {
+    setAssets(prev => prev.map(a => a.id === id ? { ...a, ...updatedFields } : a));
+
+    if (supabaseConnected) {
+      const { data: cat } = await supabase.from('categories').select('id').eq('name', updatedFields.category).maybeSingle();
+      const updates = {
+        name: updatedFields.name,
+        condition: updatedFields.condition,
+        location: updatedFields.location,
+        is_bookable: updatedFields.shared,
+        status: updatedFields.status
+      };
+      if (cat) updates.category_id = cat.id;
+
+      await supabase.from('assets').update(updates).eq('id', id);
+      fetchSupabaseData();
+    }
   };
 
-  // Allocate Asset (handles conflict validation)
-  const allocateAsset = (assetId, employeeId, expectedReturnDate = '', notes = '') => {
-    const asset = assets.find(a => a.id === assetId);
-    if (!asset) return { success: false, message: 'Asset not found.' };
-    
-    // Check if asset is already allocated/taken
-    if (asset.status !== 'Available') {
-      const activeAlloc = allocations.find(al => al.assetId === assetId && al.status === 'Active');
-      let holderName = 'Someone';
-      if (activeAlloc) {
-        const holder = employees.find(e => e.id === activeAlloc.employeeId);
-        if (holder) holderName = holder.name;
+  // ── ALLOCATIONS ──────────────────────────────────────────────────
+  const allocateAsset = async (assetId, employeeId, expectedReturnDate = '', notes = '') => {
+    if (supabaseConnected) {
+      const { data, error } = await supabase.rpc('allocate_asset', {
+        p_asset_id: assetId,
+        p_employee_id: employeeId || null,
+        p_department_id: null,
+        p_expected_return_date: expectedReturnDate || null
+      });
+
+      if (error || !data?.success) {
+        return { success: false, message: error?.message || data?.reason };
       }
-      return { 
-        success: false, 
-        conflict: true,
-        holderName,
-        message: `This asset is currently held by ${holderName}.`
-      };
+      fetchSupabaseData();
+      return { success: true };
     }
 
-    const employee = employees.find(e => e.id === employeeId);
-    const activeU = getActiveUser();
+    // fallback
+    const asset = assets.find(a => a.id === assetId);
+    if (!asset || asset.status !== 'Available') return { success: false, message: 'Not available.' };
+    const emp = employees.find(e => e.id === employeeId);
 
-    // Create allocation record
     const newAlloc = {
       id: `alloc-${Date.now()}`,
       assetId,
       employeeId,
-      allocatedBy: activeU ? activeU.id : 'system',
       allocatedDate: new Date().toISOString().substring(0, 10),
       expectedReturnDate,
-      returnedDate: '',
-      status: 'Active',
-      notes
+      status: 'Active'
     };
-
     setAllocations(prev => [...prev, newAlloc]);
-    
-    // Update asset state
-    setAssets(prev => prev.map(a => {
-      if (a.id === assetId) {
-        return {
-          ...a,
-          status: 'Allocated',
-          assignedTo: employeeId,
-          department: employee ? employee.department : '',
-          history: [...a.history, {
-            date: new Date().toISOString().substring(0, 10),
-            type: 'Allocation',
-            details: `Allocated to ${employee ? employee.name : 'Unknown Employee'}`
-          }]
-        };
-      }
-      return a;
-    }));
-
-    sendNotification(employeeId, 'Asset Allocated', `You have been allocated asset ${asset.name} (${asset.tag}).`);
-    logActivity('Asset Allocation', `Allocated ${asset.tag} to ${employee ? employee.name : 'Employee'}`);
+    setAssets(prev => prev.map(a => a.id === assetId ? { ...a, status: 'Allocated', assignedTo: employeeId, department: emp?.department || '' } : a));
     return { success: true };
   };
 
-  // Raise Transfer Request (when asset is conflicted)
-  const requestTransfer = (assetId, targetEmployeeId) => {
-    const asset = assets.find(a => a.id === assetId);
-    const activeAlloc = allocations.find(al => al.assetId === assetId && al.status === 'Active');
-    const fromEmployeeId = activeAlloc ? activeAlloc.employeeId : '';
-    const activeU = getActiveUser();
+  const requestTransfer = async (assetId, targetEmployeeId) => {
+    if (supabaseConnected) {
+      const { data, error } = await supabase.rpc('request_transfer', {
+        p_asset_id: assetId,
+        p_requested_by_employee_id: targetEmployeeId
+      });
+      if (error || !data?.success) return { success: false, message: error?.message || data?.reason };
+      fetchSupabaseData();
+      return { success: true };
+    }
 
-    if (!asset || !fromEmployeeId) return { success: false, message: 'Cannot transfer this asset.' };
-
-    const newTransfer = {
+    // fallback
+    const newTrans = {
       id: `trans-${Date.now()}`,
       assetId,
-      fromId: fromEmployeeId,
+      fromId: assets.find(a => a.id === assetId)?.assignedTo || '',
       toId: targetEmployeeId,
-      requestedBy: activeU ? activeU.id : targetEmployeeId,
       status: 'Pending',
       requestDate: new Date().toISOString().substring(0, 10)
     };
-
-    setTransfers(prev => [...prev, newTransfer]);
-
-    // Notify current holder
-    sendNotification(fromEmployeeId, 'Transfer Requested', `A transfer has been requested for your asset ${asset.name} (${asset.tag}).`);
-    
-    // Notify department heads or managers (Asset Manager approves)
-    employees.filter(e => e.role === 'Asset Manager').forEach(m => {
-      sendNotification(m.id, 'New Transfer Request', `Transfer requested for ${asset.tag} from holder to another employee.`);
-    });
-
-    logActivity('Transfer Request', `Requested transfer of ${asset.tag} to ${employees.find(e => e.id === targetEmployeeId)?.name}`);
+    setTransfers(prev => [...prev, newTrans]);
     return { success: true };
   };
 
-  // Approve Transfer Request
-  const approveTransfer = (transferId) => {
-    const trans = transfers.find(t => t.id === transferId);
-    if (!trans) return { success: false, message: 'Transfer request not found.' };
+  const approveTransfer = async (transferId) => {
+    const transObj = transfers.find(t => t.id === transferId);
+    if (!transObj) return { success: false, message: 'Transfer not found.' };
 
-    const asset = assets.find(a => a.id === trans.assetId);
-    const toEmployee = employees.find(e => e.id === trans.toId);
-    const activeU = getActiveUser();
+    if (supabaseConnected) {
+      const { data, error } = await supabase.rpc('approve_transfer', {
+        p_asset_id: transObj.assetId
+      });
+      if (error || !data?.success) return { success: false, message: error?.message || data?.reason };
+      fetchSupabaseData();
+      return { success: true };
+    }
 
-    // 1. Close current active allocation
-    setAllocations(prev => prev.map(al => {
-      if (al.assetId === trans.assetId && al.status === 'Active') {
-        return { ...al, status: 'Completed', returnedDate: new Date().toISOString().substring(0, 10), notes: `${al.notes || ''} [Transferred]` };
-      }
-      return al;
-    }));
-
-    // 2. Create new allocation
+    // fallback
+    setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, status: 'Approved' } : t));
+    setAllocations(prev => prev.map(al => al.assetId === transObj.assetId && al.status === 'Active' ? { ...al, status: 'Completed' } : al));
     const newAlloc = {
       id: `alloc-${Date.now()}`,
-      assetId: trans.assetId,
-      employeeId: trans.toId,
-      allocatedBy: activeU ? activeU.id : 'system',
+      assetId: transObj.assetId,
+      employeeId: transObj.toId,
       allocatedDate: new Date().toISOString().substring(0, 10),
-      expectedReturnDate: '',
-      returnedDate: '',
-      status: 'Active',
-      notes: 'Allocated via approved transfer.'
+      status: 'Active'
     };
     setAllocations(prev => [...prev, newAlloc]);
-
-    // 3. Update Asset
-    setAssets(prev => prev.map(a => {
-      if (a.id === trans.assetId) {
-        return {
-          ...a,
-          status: 'Allocated',
-          assignedTo: trans.toId,
-          department: toEmployee ? toEmployee.department : '',
-          history: [...a.history, {
-            date: new Date().toISOString().substring(0, 10),
-            type: 'Transfer',
-            details: `Transferred to ${toEmployee ? toEmployee.name : 'Employee'}`
-          }]
-        };
-      }
-      return a;
-    }));
-
-    // 4. Update Transfer Status
-    setTransfers(prev => prev.map(t => {
-      if (t.id === transferId) return { ...t, status: 'Approved' };
-      return t;
-    }));
-
-    sendNotification(trans.fromId, 'Transfer Approved', `Your asset ${asset ? asset.name : ''} has been transferred.`);
-    sendNotification(trans.toId, 'Asset Transferred to You', `Asset ${asset ? asset.name : ''} is now allocated to you.`);
-    logActivity('Transfer Approved', `Approved transfer of ${asset ? asset.tag : 'asset'} to ${toEmployee ? toEmployee.name : 'Employee'}`);
+    setAssets(prev => prev.map(a => a.id === transObj.assetId ? { ...a, assignedTo: transObj.toId } : a));
     return { success: true };
   };
 
-  // Reject Transfer Request
-  const rejectTransfer = (transferId) => {
-    setTransfers(prev => prev.map(t => {
-      if (t.id === transferId) return { ...t, status: 'Rejected' };
-      return t;
-    }));
-    const trans = transfers.find(t => t.id === transferId);
-    if (trans) {
-      sendNotification(trans.toId, 'Transfer Rejected', 'Your asset transfer request was rejected.');
-      logActivity('Transfer Rejected', `Rejected transfer of asset ${trans.assetId}`);
+  const rejectTransfer = async (transferId) => {
+    setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, status: 'Rejected' } : t));
+    return { success: true };
+  };
+
+  const returnAsset = async (assetId, checkInNotes = '', condition = 'Good') => {
+    const activeAlloc = allocations.find(al => al.assetId === assetId && al.status === 'Active');
+
+    if (supabaseConnected && activeAlloc) {
+      const { data, error } = await supabase.rpc('return_asset', {
+        p_allocation_id: activeAlloc.id,
+        p_condition_notes: checkInNotes
+      });
+      if (error || !data?.success) return { success: false, message: error?.message || data?.reason };
+      fetchSupabaseData();
+      return { success: true };
     }
+
+    // fallback
+    setAllocations(prev => prev.map(al => al.assetId === assetId && al.status === 'Active' ? { ...al, status: 'Completed', notes: checkInNotes } : al));
+    setAssets(prev => prev.map(a => a.id === assetId ? { ...a, status: 'Available', assignedTo: '', department: '', condition } : a));
     return { success: true };
   };
 
-  // Return Asset
-  const returnAsset = (assetId, checkInNotes = '', condition = 'Good') => {
-    const asset = assets.find(a => a.id === assetId);
-    if (!asset) return { success: false, message: 'Asset not found.' };
-
-    // Update active allocation
-    setAllocations(prev => prev.map(al => {
-      if (al.assetId === assetId && al.status === 'Active') {
-        return { 
-          ...al, 
-          status: 'Completed', 
-          returnedDate: new Date().toISOString().substring(0, 10), 
-          notes: `${al.notes || ''} [Returned - Notes: ${checkInNotes}]` 
-        };
-      }
-      return al;
-    }));
-
-    // Revert asset to Available
-    setAssets(prev => prev.map(a => {
-      if (a.id === assetId) {
-        return {
-          ...a,
-          status: 'Available',
-          assignedTo: '',
-          department: '',
-          condition: condition,
-          history: [...a.history, {
-            date: new Date().toISOString().substring(0, 10),
-            type: 'Return',
-            details: `Returned. Condition: ${condition}. Notes: ${checkInNotes}`
-          }]
-        };
-      }
-      return a;
-    }));
-
-    logActivity('Asset Return', `Returned asset ${asset.tag}. Status is now Available.`);
-    return { success: true };
-  };
-
-  // Resource Booking: Overlap Validator
-  const validateBookingOverlap = (resourceId, startTime, endTime, bookingIdToIgnore = null) => {
+  // ── BOOKINGS ─────────────────────────────────────────────────────
+  const validateBookingOverlap = (resourceId, startTime, endTime) => {
     const start = new Date(startTime).getTime();
     const end = new Date(endTime).getTime();
 
-    if (start >= end) {
-      return { valid: false, message: 'Start time must be before end time.' };
-    }
+    if (start >= end) return { valid: false, message: 'Start must be before end.' };
 
     const overlap = bookings.some(b => {
       if (b.resourceId !== resourceId) return false;
       if (b.status === 'Cancelled') return false;
-      if (bookingIdToIgnore && b.id === bookingIdToIgnore) return false;
 
       const bStart = new Date(b.startTime).getTime();
       const bEnd = new Date(b.endTime).getTime();
-
-      // Check overlap: start < bEnd AND end > bStart
       return start < bEnd && end > bStart;
     });
 
-    if (overlap) {
-      return { valid: false, message: 'This slot overlaps with an existing booking for this resource.' };
-    }
-
+    if (overlap) return { valid: false, message: 'Time slot overlaps with an existing booking.' };
     return { valid: true };
   };
 
-  // Create Booking
-  const bookResource = (resourceId, title, startTime, endTime) => {
+  const bookResource = async (resourceId, title, startTime, endTime) => {
     const validation = validateBookingOverlap(resourceId, startTime, endTime);
     if (!validation.valid) return validation;
 
     const activeU = getActiveUser();
+
+    if (supabaseConnected && activeU) {
+      const { data, error } = await supabase.rpc('create_booking', {
+        p_asset_id: resourceId,
+        p_booked_by_employee_id: activeU.id,
+        p_start_time: startTime,
+        p_end_time: endTime
+      });
+
+      if (error || !data?.success) return { success: false, message: error?.message || data?.reason };
+      fetchSupabaseData();
+      return { success: true };
+    }
+
+    // fallback
     const newBooking = {
       id: `book-${Date.now()}`,
       resourceId,
-      employeeId: activeU ? activeU.id : 'unknown',
+      employeeId: activeU?.id || 'unknown',
       title,
       startTime,
       endTime,
-      status: 'Upcoming' // Upcoming, Ongoing, Completed, Cancelled
+      status: 'Upcoming'
     };
-
     setBookings(prev => [...prev, newBooking]);
-    logActivity('Resource Booking', `Booked resource ${resourceId}: "${title}" (${startTime} to ${endTime})`);
-    
-    // Notify
-    if (activeU) {
-      sendNotification(activeU.id, 'Booking Confirmed', `Your booking for "${title}" is confirmed.`);
-    }
-
     return { success: true };
   };
 
-  // Cancel Booking
-  const cancelBooking = (bookingId) => {
-    setBookings(prev => prev.map(b => {
-      if (b.id === bookingId) {
-        logActivity('Resource Booking Cancel', `Cancelled booking "${b.title}"`);
-        if (b.employeeId) {
-          sendNotification(b.employeeId, 'Booking Cancelled', `Your booking for "${b.title}" was cancelled.`);
-        }
-        return { ...b, status: 'Cancelled' };
-      }
-      return b;
-    }));
+  const cancelBooking = async (bookingId) => {
+    if (supabaseConnected) {
+      const { data, error } = await supabase.rpc('cancel_booking', {
+        p_booking_id: bookingId
+      });
+      if (error || !data?.success) return { success: false, message: error?.message || data?.reason };
+      fetchSupabaseData();
+      return { success: true };
+    }
+
+    // fallback
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'Cancelled' } : b));
+    return { success: true };
   };
 
-  // Raise Maintenance Request
-  const raiseMaintenanceRequest = (assetId, issue, priority) => {
-    const asset = assets.find(a => a.id === assetId);
-    if (!asset) return { success: false, message: 'Asset not found.' };
-
+  // ── MAINTENANCE ──────────────────────────────────────────────────
+  const raiseMaintenanceRequest = async (assetId, issue, priority) => {
     const activeU = getActiveUser();
-    const newRequest = {
+
+    if (supabaseConnected) {
+      await supabase.from('maintenance').insert({
+        asset_id: assetId,
+        reported_by: activeU?.id,
+        issue,
+        priority,
+        status: 'Pending'
+      });
+      fetchSupabaseData();
+      return { success: true };
+    }
+
+    // fallback
+    const newReq = {
       id: `maint-${Date.now()}`,
       assetId,
-      reportedBy: activeU ? activeU.id : 'system',
+      reportedBy: activeU?.id || 'system',
       reportedDate: new Date().toISOString().substring(0, 10),
       issue,
       priority,
-      status: 'Pending', // Pending → Approved / Under Maintenance → Technician Assigned → In Progress → Resolved
-      technician: '',
-      cost: 0,
-      history: [{ status: 'Pending', date: new Date().toISOString().substring(0, 10), note: 'Raised request' }]
+      status: 'Pending'
     };
-
-    setMaintenance(prev => [...prev, newRequest]);
-    
-    // Notify Asset Managers
-    employees.filter(e => e.role === 'Asset Manager').forEach(m => {
-      sendNotification(m.id, 'New Maintenance Request', `Maintenance request raised for ${asset.name} (${asset.tag}).`);
-    });
-
-    logActivity('Maintenance Request', `Raised maintenance request for ${asset.tag} (${priority} priority)`);
+    setMaintenance(prev => [newReq, ...prev]);
     return { success: true };
   };
 
-  // Update Maintenance Status
-  const updateMaintenanceStatus = (id, newStatus, note = '', additionalData = {}) => {
-    setMaintenance(prev => prev.map(m => {
-      if (m.id === id) {
-        const historyEntry = {
-          status: newStatus,
-          date: new Date().toISOString().substring(0, 10),
-          note
-        };
+  const updateMaintenanceStatus = async (id, newStatus, note = '', additionalData = {}) => {
+    setMaintenance(prev => prev.map(m => m.id === id ? { ...m, status: newStatus, ...additionalData } : m));
 
-        const updated = {
-          ...m,
-          status: newStatus,
-          history: [...m.history, historyEntry],
-          ...additionalData
-        };
+    if (supabaseConnected) {
+      await supabase.from('maintenance').update({
+        status: newStatus,
+        technician: additionalData.technician || null,
+        cost: additionalData.cost || 0
+      }).eq('id', id);
 
-        // Trigger side-effects based on state changes
-        const asset = assets.find(a => a.id === m.assetId);
-
-        if (newStatus === 'Under Maintenance' || newStatus === 'Approved') {
-          // If approved, asset status changes to Under Maintenance
-          setAssets(prev => prev.map(a => {
-            if (a.id === m.assetId) {
-              return { 
-                ...a, 
-                status: 'Under Maintenance',
-                history: [...a.history, { date: new Date().toISOString().substring(0, 10), type: 'Maintenance Update', details: 'Flipped to Under Maintenance' }]
-              };
-            }
-            return a;
-          }));
-          sendNotification(m.reportedBy, 'Maintenance Approved', `Your maintenance request for asset ${asset ? asset.tag : ''} was approved.`);
-        } 
-        
-        if (newStatus === 'Resolved') {
-          // If resolved, asset status reverts to Available
-          setAssets(prev => prev.map(a => {
-            if (a.id === m.assetId) {
-              return { 
-                ...a, 
-                status: 'Available',
-                condition: 'Good', // default to Good or whatever checkin note is
-                history: [...a.history, { date: new Date().toISOString().substring(0, 10), type: 'Maintenance Resolved', details: `Resolved. Cost: $${updated.cost || 0}. Tech: ${updated.technician || 'N/A'}` }]
-              };
-            }
-            return a;
-          }));
-          sendNotification(m.reportedBy, 'Maintenance Resolved', `Your maintenance request for asset ${asset ? asset.tag : ''} has been resolved.`);
+      // Trigger asset status side effects
+      const maintReq = maintenance.find(m => m.id === id);
+      if (maintReq) {
+        if (newStatus === 'Approved') {
+          await supabase.from('assets').update({ status: 'UnderMaintenance' }).eq('id', maintReq.assetId);
+        } else if (newStatus === 'Resolved') {
+          await supabase.from('assets').update({ status: 'Available', condition: 'Good' }).eq('id', maintReq.assetId);
         }
-
-        logActivity('Maintenance Update', `Updated request ${id} to ${newStatus}. Note: ${note}`);
-        return updated;
       }
-      return m;
-    }));
+      fetchSupabaseData();
+    }
   };
 
-  // Create Audit Cycle
-  const createAuditCycle = (name, department, location, startDate, endDate, auditorIds) => {
+  // ── AUDIT CYCLES ─────────────────────────────────────────────────
+  const createAuditCycle = async (name, department, location, startDate, endDate, auditorIds) => {
     // Collect all assets matching department/location scope
     const matchingAssets = assets.filter(a => {
       const matchDept = !department || a.department === department;
@@ -899,7 +837,7 @@ export const StateProvider = ({ children }) => {
       assetId: a.id,
       tag: a.tag,
       name: a.name,
-      result: 'Pending', // Pending, Verified, Missing, Damaged
+      result: 'Pending',
       notes: ''
     }));
 
@@ -911,103 +849,89 @@ export const StateProvider = ({ children }) => {
       startDate,
       endDate,
       auditors: auditorIds,
-      status: 'Active', // Active, Closed
+      status: 'Active',
       checklist,
       discrepancies: []
     };
-
     setAudits(prev => [...prev, newAudit]);
-    
-    // Notify auditors
-    auditorIds.forEach(auditorId => {
-      sendNotification(auditorId, 'Assigned Auditor', `You have been assigned as an auditor for cycle: ${name}.`);
-    });
 
-    logActivity('Audit Cycle Created', `Created audit cycle: ${name} with ${checklist.length} assets.`);
+    if (supabaseConnected) {
+      await supabase.from('audits').insert({
+        name,
+        department: department || null,
+        location: location || null,
+        start_date: startDate,
+        end_date: endDate,
+        auditors: auditorIds,
+        status: 'Active',
+        checklist,
+        discrepancies: []
+      });
+      fetchSupabaseData();
+    }
     return newAudit;
   };
 
-  // Record Audit Verification
-  const recordAuditVerification = (auditId, assetId, result, notes = '') => {
+  const recordAuditVerification = async (auditId, assetId, result, notes = '') => {
     setAudits(prev => prev.map(aud => {
       if (aud.id === auditId) {
         const updatedChecklist = aud.checklist.map(item => {
-          if (item.assetId === assetId) {
-            return { ...item, result, notes };
-          }
+          if (item.assetId === assetId) return { ...item, result, notes };
           return item;
         });
+        const discrepancies = updatedChecklist.filter(item => item.result === 'Missing' || item.result === 'Damaged');
+        return { ...aud, checklist: updatedChecklist, discrepancies };
+      }
+      return aud;
+    }));
 
-        // Re-generate discrepancies checklist
+    if (supabaseConnected) {
+      const auditObj = audits.find(a => a.id === auditId);
+      if (auditObj) {
+        const updatedChecklist = auditObj.checklist.map(item => {
+          if (item.assetId === assetId) return { ...item, result, notes };
+          return item;
+        });
         const discrepancies = updatedChecklist.filter(item => item.result === 'Missing' || item.result === 'Damaged');
 
-        return {
-          ...aud,
+        await supabase.from('audits').update({
           checklist: updatedChecklist,
           discrepancies
-        };
+        }).eq('id', auditId);
+        fetchSupabaseData();
       }
-      return aud;
-    }));
-    logActivity('Audit Verification', `Recorded result ${result} for asset ${assetId} in cycle ${auditId}`);
+    }
   };
 
-  // Close Audit Cycle (Locks the cycle and updates asset statuses)
-  const closeAuditCycle = (auditId) => {
-    let closedAudit = null;
-    
-    setAudits(prev => prev.map(aud => {
-      if (aud.id === auditId) {
-        closedAudit = { ...aud, status: 'Closed' };
-        
-        // Side effects: update asset statuses for discrepancies
-        aud.checklist.forEach(item => {
+  const closeAuditCycle = async (auditId) => {
+    setAudits(prev => prev.map(aud => aud.id === auditId ? { ...aud, status: 'Closed' } : aud));
+
+    if (supabaseConnected) {
+      await supabase.from('audits').update({ status: 'Closed' }).eq('id', auditId);
+
+      // Trigger side-effects to flip missing assets to Lost
+      const auditObj = audits.find(a => a.id === auditId);
+      if (auditObj) {
+        for (const item of auditObj.checklist) {
           if (item.result === 'Missing') {
-            // Missing assets status changes to Lost
-            setAssets(prevA => prevA.map(a => {
-              if (a.id === item.assetId) {
-                return {
-                  ...a,
-                  status: 'Lost',
-                  history: [...a.history, { date: new Date().toISOString().substring(0, 10), type: 'Audit Discrepancy', details: 'Marked Missing in Audit. Status changed to Lost.' }]
-                };
-              }
-              return a;
-            }));
-            
-            // Notify Asset Managers
-            employees.filter(e => e.role === 'Asset Manager').forEach(m => {
-              sendNotification(m.id, 'Audit Discrepancy - Lost Asset', `Asset ${item.name} (${item.tag}) was confirmed missing in audit.`);
-            });
+            await supabase.from('assets').update({ status: 'Lost' }).eq('id', item.assetId);
+          } else if (item.result === 'Damaged') {
+            await supabase.from('assets').update({ condition: 'Damaged' }).eq('id', item.assetId);
           }
-
-          if (item.result === 'Damaged') {
-            // Damaged assets status changes to Needs Repair or triggers maintenance
-            setAssets(prevA => prevA.map(a => {
-              if (a.id === item.assetId) {
-                return {
-                  ...a,
-                  condition: 'Damaged',
-                  history: [...a.history, { date: new Date().toISOString().substring(0, 10), type: 'Audit Discrepancy', details: 'Marked Damaged in Audit.' }]
-                };
-              }
-              return a;
-            }));
-          }
-        });
-
-        return closedAudit;
+        }
       }
-      return aud;
-    }));
-
-    logActivity('Audit Closed', `Closed audit cycle: ${closedAudit ? closedAudit.name : auditId}. Locks applied.`);
-    return { success: true };
+      fetchSupabaseData();
+    }
   };
 
-  // Notifications - Mark as read
-  const markNotificationRead = (notifId) => {
+  // ── NOTIFICATIONS ────────────────────────────────────────────────
+  const markNotificationRead = async (notifId) => {
     setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, read: true } : n));
+
+    if (supabaseConnected) {
+      await supabase.from('notifications').update({ read: true }).eq('id', notifId);
+      fetchSupabaseData();
+    }
   };
 
   return (
@@ -1040,7 +964,6 @@ export const StateProvider = ({ children }) => {
       updateAsset,
       allocateAsset,
       requestTransfer,
-      transfersList: transfers,
       approveTransfer,
       rejectTransfer,
       returnAsset,
@@ -1053,7 +976,8 @@ export const StateProvider = ({ children }) => {
       recordAuditVerification,
       closeAuditCycle,
       markNotificationRead,
-      logActivity
+      logActivity,
+      supabaseConnected
     }}>
       {children}
     </StateContext.Provider>
