@@ -142,6 +142,55 @@ export default function DashboardPage({ activeNav, setActiveNav }) {
           </div>
         </div>
 
+        {/* Welcome / Onboarding Banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, #16233D 0%, #2A3F64 100%)',
+          color: '#FFFFFF',
+          borderRadius: 14,
+          padding: '1.75rem 2rem',
+          marginBottom: '1.5rem',
+          boxShadow: '0 8px 30px rgba(22,35,61,0.1)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ position: 'relative', zIndex: 1, maxWidth: '640px' }}>
+            <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0, letterSpacing: '-0.015em' }}>
+              Welcome to the AssetFlow Workspace
+            </h2>
+            <p style={{ fontSize: 13.5, color: '#B9C6DE', marginTop: 8, lineHeight: 1.5, margin: '8px 0 16px' }}>
+              Your real-time system of record for tracking equipment lifecycles, allocations, shared bookings, approvals, and compliance audits across the organization.
+            </p>
+            
+            {assets.length === 0 ? (
+              <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 8, padding: '12px 16px', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#EF9E85', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  ⚠️ Setup Required: No database records found
+                </p>
+                <ul style={{ paddingLeft: 16, margin: 0, fontSize: 12.5, color: '#D2DCEE', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <li>
+                    <strong>Input Seed Data</strong>: Load your <code>seed.sql</code> file (located in your Downloads) directly in the Supabase SQL editor to auto-populate the system with 15 users, assets, and requests.
+                  </li>
+                  <li>
+                    <strong>Add Manually</strong>: Or go to <strong>Org Setup (⚙️)</strong> to define your departments, categories, and begin registering new assets.
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 12 }}>
+                <span style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', padding: '4px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 500 }}>
+                  ✓ Core Schema Integrated
+                </span>
+                <span style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', padding: '4px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 500 }}>
+                  ✓ Live Supabase Auth Sync
+                </span>
+                <span style={{ background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', padding: '4px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 500 }}>
+                  ✓ 7 lifecycle states
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* KPI cards */}
         <div style={styles.kpiGrid}>
           {kpis.map(kpi => (

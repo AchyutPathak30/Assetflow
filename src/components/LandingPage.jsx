@@ -153,7 +153,7 @@ export default function LandingPage({ onLogin, onSignup }) {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', width: '100vw', background: COLORS.bg, overflowX: 'hidden' }}>
-      <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }} />
+      <canvas ref={canvasRef} style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none' }} />
 
       {/* Nav */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(243,247,252,0.86)', backdropFilter: 'blur(10px)', borderBottom: `0.5px solid ${COLORS.border}` }}>
