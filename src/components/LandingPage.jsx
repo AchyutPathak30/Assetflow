@@ -130,7 +130,6 @@ export default function LandingPage({ onLogin, onSignup }) {
         g.addColorStop(0, `rgba(${b.color},${b.alpha})`);
         g.addColorStop(1, `rgba(${b.color},0)`);
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, g, g); // Drawing gradient
         ctx.fillRect(0, 0, w, h);
       });
 
