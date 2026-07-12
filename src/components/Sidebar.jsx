@@ -68,20 +68,7 @@ export default function Sidebar({ activeNav, onNavigate }) {
         ))}
       </nav>
 
-      {/* Role Switcher Simulator */}
-      <div style={styles.simulatorRow}>
-        <span style={styles.simulatorLabel}>Simulate Role:</span>
-        <select
-          value={simulatedRole || currentUser?.role || 'Employee'}
-          onChange={(e) => setSimulatedRole(e.target.value)}
-          style={styles.simulatorSelect}
-        >
-          <option value="Employee">Employee</option>
-          <option value="Department Head">Department Head</option>
-          <option value="Asset Manager">Asset Manager</option>
-          <option value="Admin">Admin (Full Access)</option>
-        </select>
-      </div>
+
 
       {/* User footer */}
       <div style={styles.sidebarFooter}>
