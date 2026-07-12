@@ -80,6 +80,8 @@ export default function LoginSignupPage() {
   const [name, setName] = useState('');
   const [selectedDept, setSelectedDept] = useState(departments[0]?.name || 'Operations');
   const [signupRole, setSignupRole] = useState('Employee');
+  const [loginPortal, setLoginPortal] = useState('staff'); // 'staff' or 'admin'
+  const [loginRole, setLoginRole] = useState('Employee'); // 'Employee', 'Department Head', 'Asset Manager'
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -89,7 +91,8 @@ export default function LoginSignupPage() {
     setSuccess('');
 
     if (mode === 'login') {
-      const res = await loginUser(email, password);
+      const targetRole = loginPortal === 'admin' ? 'Admin' : loginRole;
+      const res = await loginUser(email, password, targetRole);
       if (!res.success) {
         setError(res.message);
       }
@@ -102,6 +105,7 @@ export default function LoginSignupPage() {
       if (res.success) {
         setSuccess(res.message);
         setMode('login');
+        setLoginPortal('staff');
         setName('');
         setPassword('');
         setSignupRole('Employee');
@@ -194,10 +198,42 @@ export default function LoginSignupPage() {
           <form onSubmit={handleSubmit}>
             {mode === 'login' ? (
               <>
-                <h2 style={styles.formTitle}>Welcome back</h2>
+                <h2 style={styles.formTitle}>
+                  {loginPortal === 'admin' ? 'Administrator Access' : 'Welcome back'}
+                </h2>
                 <p style={styles.formSubtitle}>
-                  Log in to track and manage your assets.
+                  {loginPortal === 'admin' 
+                    ? 'Log in to access administrative and organizational controls.' 
+                    : 'Log in to track and manage your department assets.'}
                 </p>
+
+                {/* Portal Sub-tabs */}
+                <div style={styles.portalTabs}>
+                  <button
+                    type="button"
+                    onClick={() => { setLoginPortal('staff'); setError(''); }}
+                    style={{
+                      ...styles.portalTabBtn,
+                      borderBottom: loginPortal === 'staff' ? `2px solid ${COLORS.accent}` : '2px solid transparent',
+                      color: loginPortal === 'staff' ? COLORS.accent : COLORS.textSecondary,
+                      fontWeight: loginPortal === 'staff' ? '600' : '500',
+                    }}
+                  >
+                    Staff Portal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setLoginPortal('admin'); setError(''); }}
+                    style={{
+                      ...styles.portalTabBtn,
+                      borderBottom: loginPortal === 'admin' ? `2px solid ${COLORS.accent}` : '2px solid transparent',
+                      color: loginPortal === 'admin' ? COLORS.accent : COLORS.textSecondary,
+                      fontWeight: loginPortal === 'admin' ? '600' : '500',
+                    }}
+                  >
+                    Admin Portal
+                  </button>
+                </div>
 
                 <label style={styles.label}>Work email</label>
                 <input
@@ -214,7 +250,7 @@ export default function LoginSignupPage() {
                   <input
                     type={showPw ? 'text' : 'password'}
                     placeholder="Enter your password"
-                    style={{ ...styles.input, marginBottom: 0, paddingRight: 40 }}
+                    style={{ ...styles.input, marginBottom: 14, paddingRight: 40 }}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -224,12 +260,32 @@ export default function LoginSignupPage() {
                     onClick={() => setShowPw((v) => !v)}
                     style={styles.pwToggle}
                     aria-label="Toggle password visibility"
+                    style={{ ...styles.pwToggle, top: 12 }}
                   >
                     {showPw ? '🙈' : '👁'}
                   </button>
                 </div>
 
-                <button type="submit" style={styles.primaryButton}>Log in</button>
+                <label style={styles.label}>Logging in as</label>
+                {loginPortal === 'staff' ? (
+                  <select
+                    style={styles.input}
+                    value={loginRole}
+                    onChange={(e) => setLoginRole(e.target.value)}
+                  >
+                    <option value="Employee">Employee (Regular Staff)</option>
+                    <option value="Department Head">Department Head</option>
+                    <option value="Asset Manager">Asset Manager</option>
+                  </select>
+                ) : (
+                  <div style={styles.adminRoleBadge}>
+                    🛡️ Administrator
+                  </div>
+                )}
+
+                <button type="submit" style={styles.primaryButton}>
+                  {loginPortal === 'admin' ? 'Log in as Admin' : 'Log in'}
+                </button>
               </>
             ) : (
               <>
@@ -463,6 +519,37 @@ const styles = {
     background: 'transparent',
     cursor: 'pointer',
     fontSize: 16,
+  },
+  portalTabs: {
+    display: 'flex',
+    gap: 16,
+    marginBottom: 20,
+    borderBottom: `1px solid ${COLORS.border}`,
+    paddingBottom: 4,
+  },
+  portalTabBtn: {
+    background: 'transparent',
+    border: 'none',
+    padding: '8px 4px',
+    cursor: 'pointer',
+    fontSize: 13.5,
+    fontFamily: 'inherit',
+    transition: 'all 0.2s',
+  },
+  adminRoleBadge: {
+    width: '100%',
+    margin: '6px 0 16px',
+    padding: '0 14px',
+    height: 44,
+    borderRadius: 8,
+    border: `0.5px solid ${COLORS.border}`,
+    background: COLORS.bg,
+    fontSize: 14,
+    color: COLORS.navy,
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    boxSizing: 'border-box',
   },
   primaryButton: {
     width: '100%',

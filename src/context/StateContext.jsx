@@ -372,7 +372,7 @@ export const StateProvider = ({ children }) => {
   };
 
   // ── AUTHENTICATION ───────────────────────────────────────────────
-  const loginUser = async (email, password) => {
+  const loginUser = async (email, password, expectedRole) => {
     if (supabaseConnected) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return { success: false, message: error.message };
@@ -388,6 +388,16 @@ export const StateProvider = ({ children }) => {
           await supabase.auth.signOut();
           return { success: false, message: 'Your account is currently deactivated.' };
         }
+
+        const uiRole = emp.role === 'AssetManager' ? 'Asset Manager' : (emp.role === 'DeptHead' ? 'Department Head' : emp.role);
+        if (uiRole !== expectedRole) {
+          await supabase.auth.signOut();
+          return {
+            success: false,
+            message: `Role mismatch: Registered as "${uiRole}", but logging in as "${expectedRole}".`
+          };
+        }
+
         setCurrentUser(emp);
         setSimulatedRole(null);
         return { success: true, user: emp };
@@ -398,6 +408,14 @@ export const StateProvider = ({ children }) => {
     const matched = employees.find(e => e.email.toLowerCase() === email.toLowerCase());
     if (matched) {
       if (matched.status === 'Inactive') return { success: false, message: 'Account is deactivated.' };
+
+      if (matched.role !== expectedRole) {
+        return {
+          success: false,
+          message: `Role mismatch: Registered as "${matched.role}", but logging in as "${expectedRole}".`
+        };
+      }
+
       setCurrentUser(matched);
       setSimulatedRole(null);
       return { success: true, user: matched };
