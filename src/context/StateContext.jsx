@@ -289,7 +289,7 @@ export const StateProvider = ({ children }) => {
   // Current logged in user.
   // Initially we log in as the Admin (Sarah / Sarah Connor - wait, Admin is emp-1, Sarah Connor is Asset Manager).
   // We can let users simulate different roles dynamically at the top!
-  const [currentUser, setCurrentUser] = useState(() => getInitialState('currentUser', DEFAULT_EMPLOYEES[0]));
+  const [currentUser, setCurrentUser] = useState(null); // always start logged out
   const [simulatedRole, setSimulatedRole] = useState(null); // When set, overrides current user's functional permissions for demo
 
   // Sync to localStorage when state changes

@@ -2,7 +2,43 @@
 // Full desktop web layout (not a mobile card). Split-screen: left = branding +
 // particle animation, right = auth form.
 
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
+
+// ── Typewriter hook ──────────────────────────────────────────────
+// Sequences through an array of strings, typing then pausing.
+function useTypewriter(lines, { speed = 38, pause = 1400 } = {}) {
+  const [displayed, setDisplayed] = useState('');
+  const [lineIdx, setLineIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [waiting, setWaiting] = useState(false);
+
+  useEffect(() => {
+    if (waiting) {
+      const t = setTimeout(() => {
+        const next = (lineIdx + 1) % lines.length;
+        setLineIdx(next);
+        setCharIdx(0);
+        setDisplayed('');
+        setWaiting(false);
+      }, pause);
+      return () => clearTimeout(t);
+    }
+
+    const currentLine = lines[lineIdx];
+    if (charIdx < currentLine.length) {
+      const t = setTimeout(() => {
+        setDisplayed(currentLine.slice(0, charIdx + 1));
+        setCharIdx((c) => c + 1);
+      }, speed);
+      return () => clearTimeout(t);
+    } else {
+      // Finished typing this line — pause before next
+      if (lines.length > 1) setWaiting(true);
+    }
+  }, [charIdx, lineIdx, waiting, lines, speed, pause]);
+
+  return displayed;
+}
 import ParticleBackground from './ParticleBackground';
 import { StateContext } from '../context/StateContext';
 
@@ -19,6 +55,23 @@ export default function LoginSignupPage() {
   const { loginUser, signupUser, departments } = useContext(StateContext);
 
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
+
+  // Typewriter data
+  const heroTitle = useTypewriter(
+    [
+      'Know where everything is.\nAll the time.',
+      'One platform.\nEvery asset.',
+      'Book resources.\nTrack returns.',
+    ],
+    { speed: 40, pause: 2000 }
+  );
+
+  const subtitle = useTypewriter(
+    [
+      "Track assets, book shared resources, and manage your organization's equipment in one place.",
+    ],
+    { speed: 22, pause: 99999 } // types once, stays
+  );
   const [showPw, setShowPw] = useState(false);
 
   // Form state
@@ -70,13 +123,19 @@ export default function LoginSignupPage() {
           </div>
 
           <h1 style={styles.heroTitle}>
-            Know where everything is.
-            <br />
-            All the time.
+            {heroTitle.split('\n').map((line, i) => (
+              <span key={i}>
+                {line}
+                {i < heroTitle.split('\n').length - 1 && <br />}
+              </span>
+            ))}
+            <span style={styles.cursor}>|</span>
           </h1>
           <p style={styles.heroSubtitle}>
-            Track assets, book shared resources, and manage your
-            organization&apos;s equipment in one place.
+            {subtitle}
+            {subtitle.length < "Track assets, book shared resources, and manage your organization's equipment in one place.".length && (
+              <span style={styles.cursor}>|</span>
+            )}
           </p>
 
           <div style={styles.statsRow}>
@@ -403,6 +462,14 @@ const styles = {
     fontSize: 15,
     cursor: 'pointer',
     fontFamily: 'inherit',
+  },
+  cursor: {
+    display: 'inline-block',
+    width: 2,
+    background: '#4C8DFF',
+    marginLeft: 2,
+    animation: 'blink 0.9s step-end infinite',
+    verticalAlign: 'text-bottom',
   },
   footnote: {
     fontSize: 12,

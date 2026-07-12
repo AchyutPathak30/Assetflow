@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { StateProvider, StateContext } from './context/StateContext';
 import LoginSignupPage from './components/LoginSignupPage';
+import CursorEffect from './components/CursorEffect';
 
 function AppContent() {
   const { currentUser } = useContext(StateContext);
@@ -24,6 +25,7 @@ function AppContent() {
 export default function App() {
   return (
     <StateProvider>
+      <CursorEffect />
       <AppContent />
     </StateProvider>
   );
