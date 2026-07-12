@@ -27,3 +27,11 @@ dist-ssr/
 *.suo
 *.ntuser
 *.user
+
+# Backend env files
+.env
+.env.local
+
+# Supabase CLI local state
+.supabase/
+supabase/.temp/

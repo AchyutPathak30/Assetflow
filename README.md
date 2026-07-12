@@ -20,3 +20,40 @@ AssetFlow is a user-centric, responsive Enterprise Asset & Resource Management E
 - **Frontend Framework**: React + Vite (proposed)
 - **Styling**: Modern Vanilla CSS with variables and custom styling
 - **Database**: LocalStorage for zero-setup local state persistence
+
+## Backend (Supabase)
+
+This repository includes the **Supabase** backend system.
+
+### 🛠️ Architecture & Core Components
+- **Supabase Schema**: Declarations for relational tables, relationships, and indexes.
+- **Row Level Security (RLS)**: Fine-grained access control policies securing data access at the database level.
+- **Business Logic Functions**: Database functions (PL/pgSQL) for complex server-side operations and integrations.
+- **Database Migrations**: Version-controlled migration files located under `supabase/migrations/`.
+
+### 📂 Project Structure
+```
+├── supabase/
+│   ├── migrations/      # Database migration SQL files
+│   └── config.toml      # Supabase project configuration
+```
+
+### ⚙️ Local Development Setup
+
+#### Prerequisites
+- Node.js (v18+)
+- Supabase CLI
+
+#### Setup CLI and Link Project
+1. Log in to Supabase CLI:
+   ```bash
+   npx supabase login
+   ```
+2. Link to the remote project:
+   ```bash
+   npx supabase link --project-ref ymccorpgjqebzwiyensy
+   ```
+3. Verify migration status:
+   ```bash
+   npx supabase migration list
+   ```
