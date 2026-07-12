@@ -4,68 +4,10 @@ import { supabase } from '../supabaseClient';
 export const StateContext = createContext();
 
 // ── DEFAULT SEED DATA (FALLBACKS FOR DEMO & TESTING) ────────────────
-const DEFAULT_DEPARTMENTS = [
-  { id: 'dep-it', name: 'Information Technology', headId: 'emp-2', parentId: null, status: 'Active' },
-  { id: 'dep-hr', name: 'Human Resources', headId: 'emp-3', parentId: null, status: 'Active' },
-  { id: 'dep-ops', name: 'Operations', headId: 'emp-4', parentId: null, status: 'Active' },
-  { id: 'dep-mkt', name: 'Marketing', headId: '', parentId: null, status: 'Active' }
-];
-
-const DEFAULT_CATEGORIES = [
-  { id: 'cat-elec', name: 'Electronics', fields: [{ name: 'Warranty Period (months)', type: 'number', required: true }] },
-  { id: 'cat-furn', name: 'Furniture', fields: [{ name: 'Material', type: 'text', required: false }] },
-  { id: 'cat-veh', name: 'Vehicles', fields: [{ name: 'License Plate', type: 'text', required: true }, { name: 'Insurance Expiry', type: 'date', required: false }] },
-  { id: 'cat-space', name: 'Shared Spaces', fields: [{ name: 'Capacity', type: 'number', required: false }] }
-];
-
-const DEFAULT_EMPLOYEES = [
-  { id: 'emp-1', name: 'Admin User', email: 'admin@assetflow.com', department: 'Information Technology', role: 'Admin', status: 'Active' },
-  { id: 'emp-2', name: 'Sarah Connor', email: 'manager@assetflow.com', department: 'Information Technology', role: 'Asset Manager', status: 'Active' },
-  { id: 'emp-3', name: 'Raj Koothrappali', email: 'head@assetflow.com', department: 'Human Resources', role: 'Department Head', status: 'Active' },
-  { id: 'emp-4', name: 'Priya Sen', email: 'staff@assetflow.com', department: 'Operations', role: 'Employee', status: 'Active' },
-  { id: 'emp-5', name: 'John Doe', email: 'john@assetflow.com', department: 'Operations', role: 'Employee', status: 'Active' }
-];
-
-const DEFAULT_ASSETS = [
-  { 
-    id: 'asset-1', 
-    name: 'Dell XPS 15 Laptop', 
-    category: 'Electronics', 
-    tag: 'AF-0001', 
-    serial: 'MX1234567', 
-    acqDate: '2025-01-10', 
-    acqCost: 1500, 
-    condition: 'Excellent', 
-    location: 'Headquarters - 3rd Floor', 
-    shared: false, 
-    status: 'Allocated',
-    department: 'Information Technology',
-    assignedTo: 'emp-4',
-    customFields: { 'Warranty Period (months)': '24' },
-    history: [
-      { date: '2025-01-10', type: 'Registration', details: 'Asset registered in system' },
-      { date: '2025-01-12', type: 'Allocation', details: 'Allocated to Priya Sen' }
-    ]
-  },
-  { 
-    id: 'asset-2', 
-    name: 'Conference Room Alpha', 
-    category: 'Shared Spaces', 
-    tag: 'AF-0003', 
-    serial: 'ROOM-A', 
-    acqDate: '2024-06-01', 
-    acqCost: 0, 
-    condition: 'Excellent', 
-    location: 'Headquarters - 1st Floor', 
-    shared: true, 
-    status: 'Available',
-    department: 'Operations',
-    assignedTo: '',
-    customFields: { 'Capacity': '12' },
-    history: [{ date: '2024-06-01', type: 'Registration', details: 'Shared space added' }]
-  }
-];
-
+const DEFAULT_DEPARTMENTS = [];
+const DEFAULT_CATEGORIES = [];
+const DEFAULT_EMPLOYEES = [];
+const DEFAULT_ASSETS = [];
 const DEFAULT_ALLOCATIONS = [];
 const DEFAULT_BOOKINGS = [];
 const DEFAULT_MAINTENANCE = [];
