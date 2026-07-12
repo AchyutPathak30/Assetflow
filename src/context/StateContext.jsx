@@ -830,7 +830,7 @@ export const StateProvider = ({ children }) => {
     const activeU = getActiveUser();
 
     if (supabaseConnected) {
-      await supabase.from('maintenance').insert({
+      const { error } = await supabase.from('maintenance').insert({
         asset_id: assetId,
         reported_by: activeU?.id,
         issue,
@@ -838,6 +838,10 @@ export const StateProvider = ({ children }) => {
         status: 'Pending',
         photo_url: photoUrl
       });
+      if (error) {
+        console.error('Failed to raise maintenance request:', error);
+        return { success: false, message: error.message };
+      }
       fetchSupabaseData();
       return { success: true };
     }
