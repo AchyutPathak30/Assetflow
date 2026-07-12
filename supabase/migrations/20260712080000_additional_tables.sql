@@ -12,6 +12,7 @@ create table maintenance (
   status text not null default 'Pending' 
     check (status in ('Pending', 'Approved', 'Technician Assigned', 'In Progress', 'Resolved', 'Rejected')),
   technician text,
+  photo_url text,
   cost numeric default 0,
   history jsonb default '[]'::jsonb,
   created_at timestamptz default now()

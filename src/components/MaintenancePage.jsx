@@ -67,10 +67,22 @@ export default function MaintenancePage({ activeNav, setActiveNav }) {
   const [formAssetId, setFormAssetId]         = useState('');
   const [formIssue, setFormIssue]             = useState('');
   const [formPriority, setFormPriority]       = useState('Medium');
+  const [photoUrl, setPhotoUrl]               = useState('');
 
   const [formTechnician, setFormTechnician]   = useState('');
   const [formCost, setFormCost]               = useState('');
   const [error, setError]                     = useState('');
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const requests = useMemo(() => {
     return [...maintenance].reverse().map(m => {
@@ -89,19 +101,20 @@ export default function MaintenancePage({ activeNav, setActiveNav }) {
   const pendingCount = maintenance.filter(r => r.status === 'Pending').length;
   const activeCount  = maintenance.filter(r => r.status !== 'Resolved' && r.status !== 'Rejected').length;
 
-  const handleRaise = (e) => {
+  const handleRaise = async (e) => {
     e.preventDefault();
     if (!formAssetId || !formIssue) {
       setError('Please select an asset and describe the issue.');
       return;
     }
 
-    const res = raiseMaintenanceRequest(formAssetId, formIssue, formPriority);
+    const res = await raiseMaintenanceRequest(formAssetId, formIssue, formPriority, photoUrl);
     if (res?.success) {
       setRaiseDrawerOpen(false);
       setFormAssetId('');
       setFormIssue('');
       setFormPriority('Medium');
+      setPhotoUrl('');
       setError('');
     } else {
       setError(res?.message || 'Error submitting request.');
@@ -254,7 +267,32 @@ export default function MaintenancePage({ activeNav, setActiveNav }) {
               </div>
 
               <label style={styles.label}>Photo / attachment (optional)</label>
-              <div style={styles.uploadBox}>Drop files here or click to upload</div>
+              <input
+                type="file"
+                id="photo-upload"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+              {photoUrl ? (
+                <div style={styles.previewContainer}>
+                  <img src={photoUrl} alt="Upload preview" style={styles.previewImg} />
+                  <button
+                    type="button"
+                    onClick={() => setPhotoUrl('')}
+                    style={styles.removePhotoBtn}
+                  >
+                    Remove Photo
+                  </button>
+                </div>
+              ) : (
+                <div
+                  style={styles.uploadBox}
+                  onClick={() => document.getElementById('photo-upload').click()}
+                >
+                  Drop files here or click to upload
+                </div>
+              )}
             </div>
 
             <div style={styles.drawerFooter}>
@@ -290,6 +328,19 @@ export default function MaintenancePage({ activeNav, setActiveNav }) {
 
             <div style={styles.drawerBody}>
               <p style={styles.issueText}>&ldquo;{detailRequest.issue}&rdquo;</p>
+
+              {detailRequest.photoUrl && (
+                <div style={{ marginTop: 14, marginBottom: 18 }}>
+                  <p style={styles.label}>ATTACHED PHOTO</p>
+                  <div style={styles.detailImageContainer}>
+                    <img
+                      src={detailRequest.photoUrl}
+                      alt="Attachment"
+                      style={styles.detailAttachmentImg}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Workflow Stepper */}
               <p style={{ ...styles.label, marginTop: 24, marginBottom: 12 }}>WORKFLOW STATUS</p>
@@ -446,4 +497,10 @@ const styles = {
   stepLabel: { fontSize: 13, color: COLORS.textMuted },
   stepLabelDone: { color: COLORS.navy, fontWeight: 500 },
   techLine:  { fontSize: 13, color: COLORS.navy, background: COLORS.purpleBg, padding: '10px 12px', borderRadius: 8, marginTop: 18 },
+
+  previewContainer: { display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6, alignItems: 'flex-start' },
+  previewImg: { width: '100%', maxHeight: 150, objectFit: 'contain', borderRadius: 8, border: `1px solid ${COLORS.border}` },
+  removePhotoBtn: { background: 'transparent', border: 'none', color: COLORS.danger, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '2px 0' },
+  detailImageContainer: { width: '100%', borderRadius: 8, border: `1px solid ${COLORS.border}`, overflow: 'hidden', marginTop: 6, background: COLORS.bg },
+  detailAttachmentImg: { width: '100%', maxHeight: 200, objectFit: 'contain', display: 'block' },
 };

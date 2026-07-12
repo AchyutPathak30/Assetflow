@@ -257,6 +257,7 @@ export const StateProvider = ({ children }) => {
           priority: m.priority,
           status: m.status,
           technician: m.technician || '',
+          photoUrl: m.photo_url || '',
           cost: Number(m.cost) || 0,
           history: m.history || []
         })));
@@ -772,7 +773,7 @@ export const StateProvider = ({ children }) => {
   };
 
   // ── MAINTENANCE ──────────────────────────────────────────────────
-  const raiseMaintenanceRequest = async (assetId, issue, priority) => {
+  const raiseMaintenanceRequest = async (assetId, issue, priority, photoUrl = '') => {
     const activeU = getActiveUser();
 
     if (supabaseConnected) {
@@ -781,7 +782,8 @@ export const StateProvider = ({ children }) => {
         reported_by: activeU?.id,
         issue,
         priority,
-        status: 'Pending'
+        status: 'Pending',
+        photo_url: photoUrl
       });
       fetchSupabaseData();
       return { success: true };
@@ -795,7 +797,8 @@ export const StateProvider = ({ children }) => {
       reportedDate: new Date().toISOString().substring(0, 10),
       issue,
       priority,
-      status: 'Pending'
+      status: 'Pending',
+      photoUrl
     };
     setMaintenance(prev => [newReq, ...prev]);
     return { success: true };
