@@ -51,10 +51,14 @@ const COLORS = {
   textMuted: '#8A96A8',
 };
 
-export default function LoginSignupPage() {
+export default function LoginSignupPage({ onBackToHome, initialMode = 'login' }) {
   const { loginUser, signupUser, departments } = useContext(StateContext);
 
-  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [mode, setMode] = useState(initialMode); // 'login' | 'signup'
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   // Typewriter data
   const heroTitle = useTypewriter(
@@ -161,6 +165,26 @@ export default function LoginSignupPage() {
       {/* RIGHT: auth form panel */}
       <div style={styles.rightPanel}>
         <div style={styles.formWrap}>
+          {onBackToHome && (
+            <button
+              onClick={onBackToHome}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: COLORS.textSecondary,
+                fontSize: 13,
+                cursor: 'pointer',
+                marginBottom: 16,
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                fontFamily: 'inherit',
+              }}
+            >
+              ← Back to Home
+            </button>
+          )}
           <div style={styles.tabs}>
             <button
               onClick={() => { setMode('login'); setError(''); setSuccess(''); }}

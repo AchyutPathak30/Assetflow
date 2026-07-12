@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { StateProvider, StateContext } from './context/StateContext';
+import LandingPage from './components/LandingPage';
 import LoginSignupPage from './components/LoginSignupPage';
 import CursorEffect from './components/CursorEffect';
 import DashboardPage from './components/DashboardPage';
@@ -15,9 +16,23 @@ import OrgSetupPage from './components/OrgSetupPage';
 function AppContent() {
   const { currentUser } = useContext(StateContext);
   const [activeNav, setActiveNav] = useState('dashboard');
+  const [authView, setAuthView] = useState('landing'); // 'landing' | 'login' | 'signup'
 
   if (!currentUser) {
-    return <LoginSignupPage />;
+    if (authView === 'landing') {
+      return (
+        <LandingPage
+          onLogin={() => setAuthView('login')}
+          onSignup={() => setAuthView('signup')}
+        />
+      );
+    }
+    return (
+      <LoginSignupPage
+        onBackToHome={() => setAuthView('landing')}
+        initialMode={authView}
+      />
+    );
   }
 
   const props = { activeNav, setActiveNav };
