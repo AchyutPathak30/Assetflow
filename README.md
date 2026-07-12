@@ -1,26 +1,39 @@
-# ⚡ AssetFlow — Enterprise Asset & Resource Management System
+# ⚡ AssetFlow — Enterprise Asset & Resource Management ERP
 
-[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success?style=flat-square&logo=vercel&color=4C8DFF)](https://assetflow-rose.vercel.app/)
-[![Database](https://img.shields.io/badge/Supabase-Connected-green?style=flat-square&logo=supabase&color=3ECF8E)](https://supabase.com)
-[![Framework](https://img.shields.io/badge/React-Vite-blue?style=flat-square&logo=react&color=61DAFB)](https://vite.dev)
+> 🔗 **Live Vercel Application:** [https://assetflow-rose.vercel.app/](https://assetflow-rose.vercel.app/)
+>
+> 🚀 **Supabase Backend Deployed:** Connected and secured with RLS & DB triggers.
 
-AssetFlow is a responsive, feature-rich, role-based Enterprise Asset & Resource Management ERP designed to replace chaotic spreadsheets with a single, real-time system of record. Track physical assets through their entire lifecycle, book shared resources, authorize maintenance, audit inventories, and view organizational statistics in one unified space.
+---
 
-🔗 **Live Vercel Application:** [https://assetflow-rose.vercel.app/](https://assetflow-rose.vercel.app/)
+## 🛠️ Complete Technology Stack
+
+AssetFlow is built with a modern, secure, and highly optimized stack designed for speed, visual excellence, and relational integrity.
+
+| Layer | Technology | Usage & Purpose |
+| :--- | :--- | :--- |
+| **Frontend Framework** | **React (v18+)** | Component-based UI structure, React Context API for global state coordination, custom Typewriter hooks. |
+| **Build System** | **Vite** | Lightning-fast development server, asset bundling, and production-optimized code-splitting. |
+| **Styling & UI** | **Vanilla CSS3** | Sleek glassmorphism, HSL custom variables for instant color themes, fully responsive CSS grids/flexbox. |
+| **Background Art** | **HTML5 Canvas API** | Custom dynamic mouse-tracking fluid animation executing on render loop. |
+| **Backend Service** | **Supabase** | Managed PostgreSQL server, real-time sync, and auth session providers. |
+| **Authentication** | **Supabase Auth** | Secure email/password login and user sign-ups mapped dynamically to employee metadata. |
+| **Security Layer** | **PostgreSQL RLS** | Row Level Security policies securing tables so employees can only execute authorized operations. |
+| **Business Logic** | **PL/pgSQL RPCs** | Server-side transactional functions (e.g. overlap checks for bookings and asset return states). |
+| **Hosting & CI/CD** | **Vercel** | Automated building and deploying synchronized directly with the GitHub repository. |
 
 ---
 
 ## 🎨 Key Features & Modules
 
-AssetFlow is divided into **10 core screens/modules** driven by a single relational database schema:
-
 ### 1. 🛡️ Portal-based Authentication & Sign Up
-* **Dedicated Admin Portal**: A secure login route exclusively for Administrator accounts.
 * **Staff Login Portal**: Built for regular staff, featuring an access role dropdown select option (**Employee**, **Department Head**, **Asset Manager**).
+* **Admin Login Portal**: A secure login route exclusively for Administrator accounts.
 * **Sign-Up Constraints**: Users choose their starting role and department. Business rules are enforced at both frontend and database triggers:
   * Maximum **1 Administrator** allowed globally.
   * Maximum **1 Department Head** per department.
   * Maximum **1 Asset Manager** per department.
+* **Staff Role Mismatch Block**: If a user selects the wrong role during login, the system automatically signs them out and blocks entry.
 
 ### 2. 📊 KPI Dashboard
 * Real-time metrics including **Assets Available**, **Assets Allocated**, **Active Bookings**, and **Pending Transfers**.
@@ -67,13 +80,9 @@ AssetFlow is divided into **10 core screens/modules** driven by a single relatio
 
 ---
 
-## 🛠️ Technology Stack
+## ⚙️ Robustness & Fallback Strategy
 
-* **Frontend**: React (Hooks, Context API) + Vite
-* **Styling**: Vanilla CSS utilizing design tokens and smooth transition variables
-* **Database & Auth**: Supabase (PostgreSQL, Realtime, row-level security policies)
-* **Robustness & Fallbacks**:
-  * **Defensive Proxy Mock Client**: A custom-built recursive thenable Proxy interceptor. If Supabase keys are missing or unconfigured (such as on initial Vercel deploy), the client replaces Supabase API chains with safe, resolve-on-await methods to prevent application crashes, falling back to a fully operational `localStorage` prototype mode.
+* **Defensive Proxy Mock Client**: A custom-built recursive thenable Proxy interceptor. If Supabase keys are missing or unconfigured (such as on initial Vercel deploy), the client replaces Supabase API chains with safe, resolve-on-await methods to prevent application crashes, falling back to a fully operational `localStorage` prototype mode.
 
 ---
 
