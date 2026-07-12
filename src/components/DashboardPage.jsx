@@ -53,7 +53,7 @@ export default function DashboardPage({ activeNav, setActiveNav }) {
     allocations,
     bookings,
     maintenance,
-    transfersList,
+    transfers,
     employees,
     notifications,
   } = useContext(StateContext);
@@ -67,7 +67,7 @@ export default function DashboardPage({ activeNav, setActiveNav }) {
   const allocatedCount    = assets.filter(a => a.status === 'Allocated').length;
   const maintenanceCount  = assets.filter(a => a.status === 'Under Maintenance').length;
   const activeBookings    = bookings.filter(b => b.status === 'Upcoming' || b.status === 'Ongoing').length;
-  const pendingTransfers  = transfersList.filter(t => t.status === 'Pending').length;
+  const pendingTransfers  = (transfers || []).filter(t => t.status === 'Pending').length;
   const myAssets          = assets.filter(a => a.assignedTo === currentUser?.id);
   const myBookings        = bookings.filter(b => b.employeeId === currentUser?.id && (b.status === 'Upcoming' || b.status === 'Ongoing'));
 
