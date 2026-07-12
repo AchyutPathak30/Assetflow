@@ -60,7 +60,7 @@ const DEFAULT_DEPTS = [
 ];
 
 export default function LoginSignupPage({ onBackToHome, initialMode = 'login' }) {
-  const { loginUser, signupUser, departments } = useContext(StateContext);
+  const { loginUser, signupUser, departments, deptAssignments } = useContext(StateContext);
 
   const [mode, setMode] = useState(initialMode); // 'login' | 'signup'
 
@@ -96,6 +96,14 @@ export default function LoginSignupPage({ onBackToHome, initialMode = 'login' })
   const [loginRole, setLoginRole] = useState('Employee'); // 'Employee', 'Department Head', 'Asset Manager'
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const displayAssignments = deptAssignments && deptAssignments.length > 0 ? deptAssignments : [
+    { department_name: 'Information Technology', head_name: 'Sarah Connor', manager_name: 'Miles Dyson' },
+    { department_name: 'Human Resources', head_name: 'Raj Koothrappali', manager_name: 'Penny Hofstadter' },
+    { department_name: 'Operations', head_name: 'Priya Sen', manager_name: 'Leonard Hofstadter' },
+    { department_name: 'Marketing', head_name: 'Amy Farrah', manager_name: 'Vacant' },
+    { department_name: 'Finance', head_name: 'Arthur Spooner', manager_name: 'Vacant' }
+  ];
 
   useEffect(() => {
     if (departments && departments.length > 0) {
@@ -400,6 +408,35 @@ export default function LoginSignupPage({ onBackToHome, initialMode = 'login' })
             )}
           </form>
 
+          {/* Department Assignments Card */}
+          <div style={styles.assignmentsCard}>
+            <h3 style={styles.assignmentsTitle}>🏢 Current Department Assignments</h3>
+            <p style={styles.assignmentsSubtitle}>
+              Check who currently holds the Head or Manager role in each department:
+            </p>
+            <div style={styles.assignmentsList}>
+              {displayAssignments.map((assignment, index) => (
+                <div key={index} style={styles.assignmentItem}>
+                  <div style={styles.assignmentDeptName}>{assignment.department_name}</div>
+                  <div style={styles.assignmentDetails}>
+                    <div style={styles.assignmentRoleText}>
+                      <span style={styles.roleLabel}>Head:</span>{' '}
+                      <span style={assignment.head_name === 'Vacant' ? styles.vacantText : styles.occupiedText}>
+                        {assignment.head_name}
+                      </span>
+                    </div>
+                    <div style={styles.assignmentRoleText}>
+                      <span style={styles.roleLabel}>Manager:</span>{' '}
+                      <span style={assignment.manager_name === 'Vacant' ? styles.vacantText : styles.occupiedText}>
+                        {assignment.manager_name}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <p style={styles.footnote}>
             Unique constraints are enforced: only one Admin is allowed globally, and one Head/Asset Manager per department.
           </p>
@@ -614,5 +651,72 @@ const styles = {
     color: COLORS.textMuted,
     textAlign: 'center',
     marginTop: '1.5rem',
+  },
+  assignmentsCard: {
+    marginTop: '2rem',
+    padding: '1.25rem',
+    borderRadius: '12px',
+    background: '#F8FAFC',
+    border: `1px solid ${COLORS.border}`,
+  },
+  assignmentsTitle: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: COLORS.navy,
+    margin: '0 0 6px 0',
+  },
+  assignmentsSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    margin: '0 0 12px 0',
+    lineHeight: 1.4,
+  },
+  assignmentsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  assignmentItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '8px 10px',
+    borderRadius: '6px',
+    background: '#FFFFFF',
+    border: '1px solid #E2E8F0',
+  },
+  assignmentDeptName: {
+    fontSize: 12.5,
+    fontWeight: 600,
+    color: COLORS.navy,
+    maxWidth: '45%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  assignmentDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
+    alignItems: 'flex-end',
+  },
+  assignmentRoleText: {
+    fontSize: 11.5,
+    color: COLORS.textSecondary,
+  },
+  roleLabel: {
+    color: COLORS.textMuted,
+    fontWeight: 500,
+  },
+  vacantText: {
+    color: '#D97706',
+    fontWeight: 600,
+    background: '#FEF3C7',
+    padding: '1px 4px',
+    borderRadius: '3px',
+  },
+  occupiedText: {
+    color: '#059669',
+    fontWeight: 500,
   },
 };

@@ -38,6 +38,7 @@ export const StateProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [simulatedRole, setSimulatedRole] = useState(null);
   const [supabaseConnected, setSupabaseConnected] = useState(false);
+  const [deptAssignments, setDeptAssignments] = useState([]);
 
   // ── Sync to localStorage ───────────────────────────────────────
   useEffect(() => {
@@ -74,6 +75,27 @@ export const StateProvider = ({ children }) => {
     localStorage.setItem('assetflow_transfers', JSON.stringify(transfers));
   }, [transfers]);
 
+  const fetchDepartmentAssignments = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_department_assignments');
+      if (data && data.length > 0) {
+        setDeptAssignments(data);
+        return;
+      }
+    } catch (err) {
+      console.warn('Failed to load assignments via RPC:', err);
+    }
+
+    // Fallback: Default assignments from seed
+    setDeptAssignments([
+      { department_name: 'Information Technology', head_name: 'Sarah Connor', manager_name: 'Miles Dyson' },
+      { department_name: 'Human Resources', head_name: 'Raj Koothrappali', manager_name: 'Penny Hofstadter' },
+      { department_name: 'Operations', head_name: 'Priya Sen', manager_name: 'Leonard Hofstadter' },
+      { department_name: 'Marketing', head_name: 'Amy Farrah', manager_name: 'Vacant' },
+      { department_name: 'Finance', head_name: 'Arthur Spooner', manager_name: 'Vacant' }
+    ]);
+  };
+
   // ── FETCH DATABASE FROM SUPABASE ──────────────────────────────────
   const fetchSupabaseData = async () => {
     try {
@@ -87,6 +109,7 @@ export const StateProvider = ({ children }) => {
           status: d.status
         })));
         setSupabaseConnected(true);
+        fetchDepartmentAssignments();
       }
 
       const { data: catData } = await supabase.from('categories').select('*');
@@ -226,6 +249,7 @@ export const StateProvider = ({ children }) => {
 
   useEffect(() => {
     fetchSupabaseData();
+    fetchDepartmentAssignments();
 
     // Bind auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -1009,7 +1033,9 @@ export const StateProvider = ({ children }) => {
       closeAuditCycle,
       markNotificationRead,
       logActivity,
-      supabaseConnected
+      supabaseConnected,
+      deptAssignments,
+      fetchDepartmentAssignments
     }}>
       {children}
     </StateContext.Provider>
