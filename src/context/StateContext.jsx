@@ -246,6 +246,7 @@ export const StateProvider = ({ children }) => {
               role: emp.role === 'AssetManager' ? 'Asset Manager' : (emp.role === 'DeptHead' ? 'Department Head' : emp.role),
               status: emp.status
             });
+            fetchSupabaseData();
           }
         } catch (e) {
           console.error(e);
