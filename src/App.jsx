@@ -9,6 +9,7 @@ import ResourceBookingPage from './components/ResourceBookingPage';
 import MaintenancePage from './components/MaintenancePage';
 import AuditCyclePage from './components/AuditCyclePage';
 import ReportsPage from './components/ReportsPage';
+import LogsPage from './components/LogsPage';
 
 function AppContent() {
   const { currentUser } = useContext(StateContext);
@@ -27,6 +28,7 @@ function AppContent() {
     case 'maintenance': return <MaintenancePage {...props} />;
     case 'audit':       return <AuditCyclePage {...props} />;
     case 'reports':     return <ReportsPage {...props} />;
+    case 'logs':        return <LogsPage {...props} />;
     default:            return <DashboardPage {...props} />;
   }
 }
