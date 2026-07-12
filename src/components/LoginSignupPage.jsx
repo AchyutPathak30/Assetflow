@@ -51,6 +51,14 @@ const COLORS = {
   textMuted: '#8A96A8',
 };
 
+const DEFAULT_DEPTS = [
+  { id: 'dep-it', name: 'Information Technology' },
+  { id: 'dep-hr', name: 'Human Resources' },
+  { id: 'dep-ops', name: 'Operations' },
+  { id: 'dep-mkt', name: 'Marketing' },
+  { id: 'dep-fin', name: 'Finance' }
+];
+
 export default function LoginSignupPage({ onBackToHome, initialMode = 'login' }) {
   const { loginUser, signupUser, departments } = useContext(StateContext);
 
@@ -82,12 +90,18 @@ export default function LoginSignupPage({ onBackToHome, initialMode = 'login' })
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [selectedDept, setSelectedDept] = useState(departments[0]?.name || 'Operations');
+  const [selectedDept, setSelectedDept] = useState(departments[0]?.name || 'Information Technology');
   const [signupRole, setSignupRole] = useState('Employee');
   const [loginPortal, setLoginPortal] = useState('staff'); // 'staff' or 'admin'
   const [loginRole, setLoginRole] = useState('Employee'); // 'Employee', 'Department Head', 'Asset Manager'
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (departments && departments.length > 0) {
+      setSelectedDept(departments[0].name);
+    }
+  }, [departments]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -344,7 +358,7 @@ export default function LoginSignupPage({ onBackToHome, initialMode = 'login' })
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
                 >
-                  {departments.map(d => (
+                  {(departments && departments.length > 0 ? departments : DEFAULT_DEPTS).map(d => (
                     <option key={d.id} value={d.name}>{d.name}</option>
                   ))}
                 </select>

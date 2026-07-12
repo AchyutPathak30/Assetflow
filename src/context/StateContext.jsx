@@ -409,15 +409,27 @@ export const StateProvider = ({ children }) => {
       });
       if (error) return { success: false, message: error.message };
 
-      // Try assigning department ID
+      // Resolve or auto-create department ID
+      let deptId = null;
       const { data: dept } = await supabase.from('departments').select('id').eq('name', departmentName).maybeSingle();
-      if (dept && data.user) {
-        // trigger handler handle_new_user runs after insert auth.users.
-        // Wait a split second and update department_id and role.
+      if (dept) {
+        deptId = dept.id;
+      } else {
+        const { data: newDept } = await supabase
+          .from('departments')
+          .insert({ name: departmentName, status: 'Active' })
+          .select('id')
+          .maybeSingle();
+        if (newDept) {
+          deptId = newDept.id;
+        }
+      }
+
+      if (data.user) {
         setTimeout(async () => {
           await supabase
             .from('employees')
-            .update({ department_id: dept.id, role: dbRole })
+            .update({ department_id: deptId, role: dbRole })
             .eq('auth_user_id', data.user.id);
           fetchSupabaseData();
         }, 800);
