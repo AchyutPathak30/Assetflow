@@ -79,6 +79,7 @@ export default function LoginSignupPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [selectedDept, setSelectedDept] = useState(departments[0]?.name || 'Operations');
+  const [signupRole, setSignupRole] = useState('Employee');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -97,12 +98,13 @@ export default function LoginSignupPage() {
         setError('Please fill in all fields.');
         return;
       }
-      const res = await signupUser(name, email, password, selectedDept);
+      const res = await signupUser(name, email, password, selectedDept, signupRole);
       if (res.success) {
         setSuccess(res.message);
         setMode('login');
         setName('');
         setPassword('');
+        setSignupRole('Employee');
       } else {
         setError(res.message);
       }
@@ -233,8 +235,7 @@ export default function LoginSignupPage() {
               <>
                 <h2 style={styles.formTitle}>Create your account</h2>
                 <p style={styles.formSubtitle}>
-                  You&apos;ll join as an employee. Roles are assigned by your
-                  admin.
+                  Fill in your credentials and select your organizational role.
                 </p>
 
                 <label style={styles.label}>Full name</label>
@@ -268,6 +269,18 @@ export default function LoginSignupPage() {
                   ))}
                 </select>
 
+                <label style={styles.label}>Access Role</label>
+                <select
+                  style={styles.input}
+                  value={signupRole}
+                  onChange={(e) => setSignupRole(e.target.value)}
+                >
+                  <option value="Employee">Employee (Regular Staff)</option>
+                  <option value="Department Head">Department Head (1 per department)</option>
+                  <option value="Asset Manager">Asset Manager (1 per department)</option>
+                  <option value="Admin">Administrator (1 globally)</option>
+                </select>
+
                 <label style={styles.label}>Password</label>
                 <div style={styles.pwWrap}>
                   <input
@@ -294,7 +307,7 @@ export default function LoginSignupPage() {
           </form>
 
           <p style={styles.footnote}>
-            Only admins assign roles. New accounts always start as employee.
+            Unique constraints are enforced: only one Admin is allowed globally, and one Head/Asset Manager per department.
           </p>
         </div>
       </div>

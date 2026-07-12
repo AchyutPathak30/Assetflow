@@ -413,12 +413,39 @@ export const StateProvider = ({ children }) => {
     setSimulatedRole(null);
   };
 
-  const signupUser = async (name, email, password, departmentName = 'Operations') => {
+  const signupUser = async (name, email, password, departmentName = 'Operations', chosenRole = 'Employee') => {
+    // 1. Validation Checks
+    if (chosenRole === 'Admin') {
+      const hasAdmin = employees.some(e => e.role === 'Admin');
+      if (hasAdmin) {
+        return { success: false, message: 'An Administrator already exists. Only one Admin is allowed.' };
+      }
+    }
+    if (chosenRole === 'Department Head') {
+      const hasHead = employees.some(e => e.role === 'Department Head' && e.department === departmentName);
+      if (hasHead) {
+        return { success: false, message: `The department (${departmentName}) already has an assigned Head.` };
+      }
+    }
+    if (chosenRole === 'Asset Manager') {
+      const hasManager = employees.some(e => e.role === 'Asset Manager' && e.department === departmentName);
+      if (hasManager) {
+        return { success: false, message: `The department (${departmentName}) already has an assigned Asset Manager.` };
+      }
+    }
+
     if (supabaseConnected) {
+      const dbRole = chosenRole === 'Asset Manager' ? 'AssetManager' : (chosenRole === 'Department Head' ? 'DeptHead' : chosenRole);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name } }
+        options: { 
+          data: { 
+            name,
+            role: dbRole,
+            department: departmentName
+          } 
+        }
       });
       if (error) return { success: false, message: error.message };
 
@@ -426,11 +453,11 @@ export const StateProvider = ({ children }) => {
       const { data: dept } = await supabase.from('departments').select('id').eq('name', departmentName).maybeSingle();
       if (dept && data.user) {
         // trigger handler handle_new_user runs after insert auth.users.
-        // Wait a split second and update department_id.
+        // Wait a split second and update department_id and role.
         setTimeout(async () => {
           await supabase
             .from('employees')
-            .update({ department_id: dept.id })
+            .update({ department_id: dept.id, role: dbRole })
             .eq('auth_user_id', data.user.id);
           fetchSupabaseData();
         }, 800);
@@ -440,12 +467,16 @@ export const StateProvider = ({ children }) => {
     }
 
     // Fallback
+    if (employees.some(e => e.email.toLowerCase() === email.toLowerCase())) {
+      return { success: false, message: 'Email is already registered.' };
+    }
+
     const newEmp = {
       id: `emp-${Date.now()}`,
       name,
       email,
       department: departmentName,
-      role: 'Employee',
+      role: chosenRole,
       status: 'Active'
     };
     setEmployees(prev => [...prev, newEmp]);
@@ -453,6 +484,28 @@ export const StateProvider = ({ children }) => {
   };
 
   const updateEmployeeRole = async (empId, newRole, newDepartment = null, newStatus = null) => {
+    const targetDept = newDepartment || employees.find(e => e.id === empId)?.department;
+
+    // Validation checks
+    if (newRole === 'Admin') {
+      const hasAdmin = employees.some(e => e.id !== empId && e.role === 'Admin');
+      if (hasAdmin) {
+        return { success: false, message: 'An Administrator already exists. Only one Admin is allowed.' };
+      }
+    }
+    if (newRole === 'Department Head') {
+      const hasHead = employees.some(e => e.id !== empId && e.role === 'Department Head' && e.department === targetDept);
+      if (hasHead) {
+        return { success: false, message: `The department (${targetDept}) already has an assigned Head.` };
+      }
+    }
+    if (newRole === 'Asset Manager') {
+      const hasManager = employees.some(e => e.id !== empId && e.role === 'Asset Manager' && e.department === targetDept);
+      if (hasManager) {
+        return { success: false, message: `The department (${targetDept}) already has an assigned Asset Manager.` };
+      }
+    }
+
     setEmployees(prev => prev.map(emp => {
       if (emp.id === empId) {
         return {
@@ -466,17 +519,20 @@ export const StateProvider = ({ children }) => {
     }));
 
     if (supabaseConnected) {
+      const dbRole = newRole === 'Asset Manager' ? 'AssetManager' : (newRole === 'Department Head' ? 'DeptHead' : newRole);
       const { data: dept } = await supabase.from('departments').select('id').eq('name', newDepartment).maybeSingle();
       await supabase
         .from('employees')
         .update({
-          role: newRole,
+          role: dbRole,
           department_id: dept ? dept.id : null,
           status: newStatus !== null ? newStatus : 'Active'
         })
         .eq('id', empId);
       fetchSupabaseData();
     }
+
+    return { success: true };
   };
 
   // ── DEPARTMENTS & CATEGORIES ─────────────────────────────────────

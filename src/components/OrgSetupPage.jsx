@@ -171,13 +171,18 @@ export default function OrgSetupPage({ activeNav, setActiveNav }) {
   };
 
   // ── Employee Role Updates ──────────────────────────────────────
-  const handleEmpSave = (e) => {
+  const handleEmpSave = async (e) => {
     e.preventDefault();
     if (!editingEmp) return;
 
-    updateEmployeeRole(editingEmp.id, empRole, empDept, empStatus);
-    setEmpDrawerOpen(false);
-    setEditingEmp(null);
+    const res = await updateEmployeeRole(editingEmp.id, empRole, empDept, empStatus);
+    if (res && !res.success) {
+      setError(res.message);
+    } else {
+      setEmpDrawerOpen(false);
+      setEditingEmp(null);
+      setError('');
+    }
   };
 
   const startEditEmp = (emp) => {
@@ -185,6 +190,7 @@ export default function OrgSetupPage({ activeNav, setActiveNav }) {
     setEmpRole(emp.role);
     setEmpDept(emp.department);
     setEmpStatus(emp.status);
+    setError('');
     setEmpDrawerOpen(true);
   };
 
@@ -559,6 +565,7 @@ export default function OrgSetupPage({ activeNav, setActiveNav }) {
 
             <form onSubmit={handleEmpSave} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
               <div style={styles.drawerBody}>
+                {error && <div style={styles.errorBox}>{error}</div>}
                 <p style={{ fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 }}>
                   Email: <strong>{editingEmp.email}</strong>
                 </p>
