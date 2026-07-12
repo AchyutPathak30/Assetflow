@@ -7,6 +7,8 @@ import AssetDirectoryPage from './components/AssetDirectoryPage';
 import AllocationTransferPage from './components/AllocationTransferPage';
 import ResourceBookingPage from './components/ResourceBookingPage';
 import MaintenancePage from './components/MaintenancePage';
+import AuditCyclePage from './components/AuditCyclePage';
+import ReportsPage from './components/ReportsPage';
 
 function AppContent() {
   const { currentUser } = useContext(StateContext);
@@ -23,6 +25,8 @@ function AppContent() {
     case 'allocation':  return <AllocationTransferPage {...props} />;
     case 'booking':     return <ResourceBookingPage {...props} />;
     case 'maintenance': return <MaintenancePage {...props} />;
+    case 'audit':       return <AuditCyclePage {...props} />;
+    case 'reports':     return <ReportsPage {...props} />;
     default:            return <DashboardPage {...props} />;
   }
 }
