@@ -163,7 +163,7 @@ export const StateProvider = ({ children }) => {
           name: e.name,
           email: e.email,
           department: e.departments ? e.departments.name : '',
-          role: e.role,
+          role: e.role === 'AssetManager' ? 'Asset Manager' : (e.role === 'DeptHead' ? 'Department Head' : e.role),
           status: e.status
         })));
       }
@@ -301,7 +301,7 @@ export const StateProvider = ({ children }) => {
               name: emp.name,
               email: emp.email,
               department: emp.departments ? emp.departments.name : '',
-              role: emp.role,
+              role: emp.role === 'AssetManager' ? 'Asset Manager' : (emp.role === 'DeptHead' ? 'Department Head' : emp.role),
               status: emp.status
             });
           }
